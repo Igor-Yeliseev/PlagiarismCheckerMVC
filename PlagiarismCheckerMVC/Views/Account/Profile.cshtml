@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Личный кабинет";
+}
+
+<div class="profile-container">
+    <h2>Мои документы</h2>
+    <p>Здесь вы можете загружать и управлять вашими документами для проверки на плагиат.</p>
+    
+    <button id="toggleUploadBtn" class="btn btn-add">Загрузить новый документ</button>
+    
+    <div id="uploadFormContainer" class="upload-form-container">
+        <h3>Загрузить документ</h3>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="documentFile">Выберите файл (DOC, DOCX, PDF, TXT)</label>
+                <input type="file" id="documentFile" name="documentFile" accept=".doc,.docx,.pdf,.txt" required>
+            </div>
+            <div class="form-submit">
+                <button type="submit" class="btn">Загрузить</button>
+                <button type="button" id="cancelUpload" class="btn btn-danger">Отмена</button>
+            </div>
+        </form>
+    </div>
+    
+    <div id="documentsContainer">
+        <div class="empty-message">Загрузка документов...</div>
+    </div>
+</div>
+
+<!-- Модальное окно для подтверждения удаления -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Подтверждение удаления</h3>
+        </div>
+        <p>Вы уверены, что хотите удалить этот документ?</p>
+        <div class="modal-footer">
+            <button id="confirmDeleteBtn" class="btn btn-danger">Да, удалить</button>
+            <button id="cancelDeleteBtn" class="btn">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Уведомление -->
+<div id="notification" class="notification"></div>
+
+@section Scripts {
+    <script src="~/js/documents.js"></script>
+} 

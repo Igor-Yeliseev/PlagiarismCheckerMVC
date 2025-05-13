@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка на плагиат - PlagChecker</title>
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/particles.css">
+    <link rel="stylesheet" href="/css/preloader.css">
+    <link rel="stylesheet" href="/css/navbar-style.css">
+    <!-- Предзагрузка изображений -->
+    <link rel="preload" href="/images/plag-search-icon.png" as="image">
+    <link rel="preload" href="/images/llms-icon.png" as="image">
+    <link rel="preload" href="/images/plag-checker-logo.png" as="image">
+</head>
+<body>
+    <!-- Прелоадер -->
+    <div id="page-preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <!-- Контейнер для particles.js -->
+    <div id="particles-js"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-left">
+                <a href="javascript:void(0)" onclick="window.history.back()" class="back-button">&#10094;</a>
+                <div class="logo-container">
+                    <img src="/images/plag-search-icon.png" alt="Search Icon" class="logo-icon" draggable="false">
+                    <img src="/images/llms-icon.png" alt="LLMs Icon" class="logo-icon" draggable="false">
+                    <img src="/images/plag-checker-logo.png" alt="PlagChecker Logo" class="logo-icon" draggable="false">
+                </div>
+            </div>
+            <div class="greeting-container">
+                <!-- Приветствие будет добавлено через JavaScript -->
+            </div>
+            <ul class="navbar-controls">
+                <li><a href="/plag-check-new.html" class="nav-button">Плагиат</a></li>
+                <li><a href="/my-documents.html" class="nav-button">Мои документы</a></li>
+                <li><a href="/format-check.html" class="nav-button">Оформление</a></li>
+                <li><a href="#" id="logout" class="nav-button">Выйти</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="check-plagiarism-container">
+            <h2>Проверка документа на плагиат</h2>
+            
+            <div class="search-settings">
+                <div class="select-group">
+                    <label for="search-engine">Выберите поисковую систему:</label>
+                    <select id="search-engine" class="form-control">
+                        <option value="google">Google</option>
+                        <option value="yandex">Yandex</option>
+                    </select>
+                </div>
+                
+                <button id="check-plag-btn" class="btn btn-primary">Проверить</button>
+            </div>
+            
+            <div id="spinner" class="spinner" style="display: none;">
+                <div class="spinner-border"></div>
+                <p>Идет проверка документа...</p>
+            </div>
+            
+            <!-- Таймер -->
+            <div id="timer-container" class="timer-container" style="display: none;">
+                <p>Время проверки: <span id="timer">00:00</span></p>
+            </div>
+            
+            <div id="results-container" class="results-container">
+                <!-- Здесь будут отображаться результаты -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Подключение скриптов -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="/js/preloader.js"></script>
+    <script src="/js/particles-config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/check-uploaded.js"></script>
+</body>
+</html> 
