@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+
+# Конфиденциальные данные
+.cursor/
+resources/
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
