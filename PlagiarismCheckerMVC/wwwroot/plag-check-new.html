@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проверка на плагиат - PlagChecker</title>
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/particles.css">
+    <link rel="stylesheet" href="/css/preloader.css">
+    <link rel="stylesheet" href="/css/navbar-style.css">
+    <!-- Предзагрузка изображений -->
+    <link rel="preload" href="/images/plag-search-icon.png" as="image">
+    <link rel="preload" href="/images/llms-icon.png" as="image">
+    <link rel="preload" href="/images/plag-checker-logo.png" as="image">
+</head>
+<body>
+    <!-- Прелоадер -->
+    <div id="page-preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+
+    <!-- Контейнер для particles.js -->
+    <div id="particles-js"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-left">
+                <a href="javascript:void(0)" onclick="window.history.back()" class="back-button">&#10094;</a>
+                <div class="logo-container">
+                    <img src="/images/plag-search-icon.png" alt="Search Icon" class="logo-icon" draggable="false">
+                    <img src="/images/llms-icon.png" alt="LLMs Icon" class="logo-icon" draggable="false">
+                    <img src="/images/plag-checker-logo.png" alt="PlagChecker Logo" class="logo-icon" draggable="false">
+                </div>
+            </div>
+            <div class="greeting-container">
+                <!-- Приветствие будет добавлено через JavaScript -->
+            </div>
+            <ul class="navbar-controls">
+                <li><span class="nav-button active">Плагиат</span></li>
+                <li><a href="/my-documents.html" class="nav-button">Мои документы</a></li>
+                <li><a href="/format-check.html" class="nav-button">Оформление</a></li>
+                <li><a href="#" id="logout" class="nav-button">Выйти</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="documents-header">
+            <h2>Проверка на плагиат</h2>
+        </div>
+        
+        <div id="check-form-container">
+            <div class="form-container">
+                <h3>Загрузить документ для проверки</h3>
+                <form id="check-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="document-file">Выберите документ (.docx)</label>
+                        <input type="file" id="document-file" class="form-control" accept=".docx" required>
+                        <button id="close-file-btn" class="btn-close" type="button">&times;</button>
+                    </div>
+                    
+                    <div class="form-group search-engine-options">
+                        <label>Выберите поисковый движок:</label>
+                        <div class="search-engines-container">
+                            <div class="radio-option">
+                                <input type="radio" id="google" name="searchEngine" value="Google" checked>
+                                <label for="google">Google</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="yandex" name="searchEngine" value="Yandex">
+                                <label for="yandex">Yandex</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn">Проверить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Таймер -->
+        <div id="timer-container" class="timer-container" style="display: none;">
+            <p>Время проверки: <span id="timer">00:00.00</span></p>
+        </div>
+    </div>
+    
+    <!-- Подключение скриптов -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="/js/preloader.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/particles-config.js"></script>
+    <script src="/js/plag-check.js"></script>
+</body>
+</html> 

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagChecker - Поиск плагиата в документах</title>
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/particles.css">
+    <link rel="stylesheet" href="/css/preloader.css">
+    <link rel="stylesheet" href="/css/navbar-style.css">
+    <!-- Предзагрузка изображений -->
+    <link rel="preload" href="/images/plag-search-icon.png" as="image">
+    <link rel="preload" href="/images/llms-icon.png" as="image">
+    <link rel="preload" href="/images/plag-checker-logo.png" as="image">
+    <style>
+        /* Уникальные стили для главной страницы */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            color: white;
+            text-align: center;
+            padding-top: 50px;
+        }
+        
+        
+        .features {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 30px;
+            backdrop-filter: blur(5px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+                
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .nav-item {
+            background-color: rgba(52, 152, 219, 0.8);
+            padding: 15px 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(41, 128, 185, 0.9);
+            transform: translateY(-5px);
+        }
+        
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Прелоадер -->
+    <div id="page-preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+    
+    <!-- Контейнер для particles.js -->
+    <div id="particles-js"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-left">
+                <div class="logo-container">
+                    <img src="/images/plag-search-icon.png" alt="Search Icon" class="logo-icon" draggable="false">
+                    <img src="/images/llms-icon.png" alt="LLMs Icon" class="logo-icon" draggable="false">
+                    <img src="/images/plag-checker-logo.png" alt="PlagChecker Logo" class="logo-icon" draggable="false">
+                </div>
+            </div>
+            <div class="greeting-container">
+                <!-- Приветствие будет добавлено через JavaScript -->
+            </div>
+            <ul class="navbar-controls">
+                <li><a href="/login.html" class="nav-button">Вход</a></li>
+                <li><a href="/register.html" class="nav-button">Регистрация</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="container">
+            <h1>PlagChecker</h1>
+            <p style="font-size: 20px; margin-top: 15px;">Интеллектуальный сервис для поиска плагиата в документах</p>
+            
+            <div class="nav-menu">
+                <div class="nav-item">
+                    <a href="/check-plagiarism">Проверить текст</a>
+                </div>
+                <div class="nav-item">
+                    <a href="/my-documens">Мои документы</a>
+                </div>
+                <div class="nav-item">
+                    <a href="#about">О сервисе</a>
+                </div>
+            </div>
+            
+            <div class="features" id="about">
+                <h2>Поиск плагиата в Word-документах</h2>
+                <p>PlagChecker - это сервис, который поможет вам проверить ваши документы на наличие плагиата с использованием мощных поисковых систем.</p>
+                
+                <h3>Возможности:</h3>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Проверка документов Word формата .docx</li>
+                    <li>Использование API Google и Яндекс для поиска</li>
+                    <li>Разбивка текста на абзацы и предложения</li>
+                    <li>Удаление стоп-слов для повышения точности</li>
+                    <li>Подробные отчеты с указанием источников заимствования</li>
+                </ul>
+                
+                <div style="margin-top: 30px;">
+                    <a href="/register" class="btn">Начать использовать</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Подключение скриптов -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="/js/preloader.js"></script>
+    <script src="/js/particles-config.js"></script>
+    <script src="/js/auth.js"></script>
+</body>
+</html> 
