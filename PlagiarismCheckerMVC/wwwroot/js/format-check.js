@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('format-document-file');
     const formatDocumentBtn = document.getElementById('format-document-btn');
     const selectedFileContainer = document.getElementById('selected-file-container');
@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeFileBtn = document.getElementById('close-file-btn');
     const timerContainer = document.getElementById('timer-container');
     const timerDisplay = document.getElementById('timer');
-    
+
     let timer;
     let startTime;
-    
+
     // Функция запуска таймера
     function startTimer() {
         startTime = new Date();
@@ -18,37 +18,37 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTimerDisplay();
         timer = setInterval(updateTimerDisplay, 10); // Обновляем каждые 10 мс для отображения миллисекунд
     }
-    
+
     // Функция остановки таймера
     function stopTimer() {
         clearInterval(timer);
     }
-    
+
     // Функция обновления отображения таймера
     function updateTimerDisplay() {
         const currentTime = new Date();
         const elapsedTime = new Date(currentTime - startTime);
-        
+
         const minutes = Math.floor(elapsedTime / 60000);
         const seconds = Math.floor((elapsedTime % 60000) / 1000);
         const milliseconds = Math.floor((elapsedTime % 1000) / 10);
-        
+
         timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
     }
-    
+
     // Обработчик клика по кнопке "Загрузить документ"
-    formatDocumentBtn.addEventListener('click', function() {
+    formatDocumentBtn.addEventListener('click', function () {
         fileInput.click();
     });
-    
+
     // Обработчик клика по кнопке закрытия
-    closeFileBtn.addEventListener('click', function() {
+    closeFileBtn.addEventListener('click', function () {
         selectedFileContainer.style.display = 'none';
         fileInput.value = ''; // Сбрасываем выбранный файл
     });
-    
+
     // Обработчик выбора файла
-    fileInput.addEventListener('change', function(e) {
+    fileInput.addEventListener('change', function (e) {
         if (this.files.length > 0) {
             const file = this.files[0];
             fileName.textContent = file.name;
@@ -57,42 +57,41 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedFileContainer.style.display = 'none';
         }
     });
-    
+
     // Обработчик отправки файла
-    submitButton.addEventListener('click', async function() {
+    submitButton.addEventListener('click', async function () {
         const file = fileInput.files[0];
         if (!file) {
             alert('Пожалуйста, выберите файл');
             return;
         }
-        
+
         // Отображаем спиннер загрузки
         const spinner = document.getElementById('format-spinner');
         spinner.style.display = 'flex';
-        
+
         // Запускаем таймер
         startTimer();
-        
+
         // Скрываем кнопку отправки, чтобы избежать повторных отправок
         submitButton.disabled = true;
-        
+
         // Имитация задержки загрузки (3 секунды)
         // setTimeout(() => {
         //     // Скрываем спиннер и разблокируем кнопку
         //     spinner.style.display = 'none';
         //     submitButton.disabled = false;
-            
+
         //     // Останавливаем таймер
         //     stopTimer();
-            
+
         //     // Показываем сообщение
         //     alert('Файл был отправлен');
         // }, 3000);
-        
 
         const formData = new FormData();
         formData.append('file', file);
-        
+
         await fetch('https://localhost:7060/word-formatting-api/check-doc', {
             method: 'POST',
             headers: {
@@ -104,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error('Ошибка сервера: ' + response.status);
             }
-            
+
             // Получаем имя файла из заголовка ответа или используем имя "формат_[исходное имя файла]"
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = 'формат_' + file.name;
@@ -114,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     filename = filenameMatch[1];
                 }
             }
-            
+
             // Получаем бинарные данные документа
             return response.blob().then(blob => {
                 return {
@@ -131,86 +130,29 @@ document.addEventListener('DOMContentLoaded', function() {
             a.download = data.filename;
             document.body.appendChild(a);
             a.click();
-            
+
             // Удаляем ссылку после скачивания
             setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }, 100);
-            
-            // Скрываем спиннер и разблокируем кнопку
+
             spinner.style.display = 'none';
             submitButton.disabled = false;
-            
-            // Останавливаем таймер
+
             stopTimer();
-            
+
             console.log('Успех: документ с форматированием загружен');
         })
         .catch((error) => {
             console.error('Ошибка:', error);
             alert('Произошла ошибка при отправке файла: ' + error.message);
-            
+
             // Скрываем спиннер и разблокируем кнопку
             spinner.style.display = 'none';
             submitButton.disabled = false;
-            
+
             stopTimer();
         });
-        
     });
-
-    /*
-    const checkFormattingBtn = document.querySelector('.submitBtn');
-    checkFormattingBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
-    
-        const fileInput = document.getElementById('fileUpload');
-        const docxFile = fileInput.files[0];
-    
-        let formData = new FormData();
-        formData.append('file', docxFile);
-    
-        var fileName = "example.docx";
-    
-        loader.style.display = 'block'; // Показать загрузчик
-    
-        await fetch('https://localhost:7060/word-formatting-api/check-doc', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': getCsrfTokenValue(),
-            },
-        })
-        .then(response => {
-            if (!response.ok){
-                return response.text().then((text) => { throw new Error(text)});
-            }
-    
-            const contentDisposition = response.headers.get('Content-Disposition');
-            const match = contentDisposition.match(/filename="(.+)"/);
-            fileName = match[1];
-            return response.blob();
-        })
-        .then(blob => {
-    
-            var file = new Blob([blob], { type: 'application/octet-stream' }); 
-            var url = window.URL.createObjectURL(file);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch((error) => {
-            console.log('Ошибка при обработке файла:', error.message);
-        });
-    
-        loader.style.display = 'none'; // Скрыть загрузчик
-    });
-    */
 }); 

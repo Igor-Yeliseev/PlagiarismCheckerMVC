@@ -55,6 +55,40 @@ namespace PlagiarismCheckerMVC.Services
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<DocumentDTO>> GetUserDocumentsWithOriginalityAsync(Guid userId)
+        {
+            // Получаем все документы пользователя
+            var documents = await _context.Documents
+                .Where(d => d.UserId == userId)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToListAsync();
+
+            var result = new List<DocumentDTO>();
+
+            foreach (var doc in documents)
+            {
+                // Пытаемся найти результат проверки на плагиат для документа
+                var checkResult = await _context.DocumentCheckResults
+                    .Where(cr => cr.DocumentId == doc.Id)
+                    .OrderByDescending(cr => cr.CheckedAt) // Берем самый последний результат проверки
+                    .FirstOrDefaultAsync();
+
+                // Создаем DTO объект
+                var docDto = new DocumentDTO
+                {
+                    Id = doc.Id,
+                    Name = doc.Name,
+                    UploadDate = doc.CreatedAt,
+                    // Если есть результат проверки - берем его, иначе ставим 100%
+                    Originality = checkResult != null ? checkResult.Originality * 100 : 100
+                };
+
+                result.Add(docDto);
+            }
+
+            return result;
+        }
+
         public async Task<Document> GetByIdAsync(Guid id)
         {
             return await _context.Documents.FindAsync(id);
