@@ -53,12 +53,12 @@ namespace PlagiarismCheckerMVC.Controllers
         }
 
         [HttpGet("documents")]
-        public async Task<ActionResult<IEnumerable<Document>>> GetUserDocuments()
+        public async Task<ActionResult<IEnumerable<DocumentDTO>>> GetUserDocuments()
         {
             try
             {
                 var userId = GetUserId();
-                var documents = await _documentService.GetUserDocumentsAsync(userId);
+                var documents = await _documentService.GetUserDocumentsWithOriginalityAsync(userId);
                 return Ok(documents);
             }
             catch (Exception ex)

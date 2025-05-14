@@ -11,6 +11,7 @@ namespace PlagiarismCheckerMVC.Models
         
         public DbSet<User> Users { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentCheckResult> DocumentCheckResults { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -26,6 +27,13 @@ namespace PlagiarismCheckerMVC.Models
                 .HasOne(d => d.User)
                 .WithMany()
                 .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            // Связь между Document и DocumentCheckResult
+            modelBuilder.Entity<DocumentCheckResult>()
+                .HasOne(cr => cr.Document)
+                .WithMany()
+                .HasForeignKey(cr => cr.DocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
