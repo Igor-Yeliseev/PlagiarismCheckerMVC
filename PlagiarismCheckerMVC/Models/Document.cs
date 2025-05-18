@@ -26,5 +26,8 @@ namespace PlagiarismCheckerMVC.Models
         
         [ForeignKey("UserId")]
         public User? User { get; set; }
+
+        [InverseProperty("Document")]
+        public virtual DocumentCheckResult? DocumentCheckResult { get; set; }
     }
 } 

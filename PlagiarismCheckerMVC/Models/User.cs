@@ -3,6 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PlagiarismCheckerMVC.Models
 {
+    public enum UserRole
+    {
+        User,
+        Admin
+    }
+
     public class User
     {
         [Key]
@@ -23,6 +29,6 @@ namespace PlagiarismCheckerMVC.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         [Required]
-        public string Role { get; set; } = "user"; // По умолчанию обычный пользователь
+        public UserRole Role { get; set; } = UserRole.User; // По умолчанию обычный пользователь
     }
 } 

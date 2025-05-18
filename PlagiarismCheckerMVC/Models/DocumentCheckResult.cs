@@ -7,10 +7,7 @@ namespace PlagiarismCheckerMVC.Models
     [Table("DocumentCheckResults")]
     public class DocumentCheckResult
     {
-        [Key]
-        public int Id { get; set; }
-
-        [Required]
+        [Key, ForeignKey("Document")]
         public Guid DocumentId { get; set; }
 
         [Required]
@@ -20,7 +17,6 @@ namespace PlagiarismCheckerMVC.Models
         [Required]
         public DateTime CheckedAt { get; set; }
 
-        [ForeignKey(nameof(DocumentId))]
         public virtual Document? Document { get; set; }
     }
 } 

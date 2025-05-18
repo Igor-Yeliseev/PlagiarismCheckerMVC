@@ -40,7 +40,7 @@ namespace PlagiarismCheckerMVC.Services
                 Email = request.Email,
                 HashedPassword = hashedPassword,
                 CreatedAt = DateTime.UtcNow,
-                Role = "user"
+                Role = UserRole.User
             };
 
             // Добавляем пользователя в базу данных
@@ -92,7 +92,7 @@ namespace PlagiarismCheckerMVC.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

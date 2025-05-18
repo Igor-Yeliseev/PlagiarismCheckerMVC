@@ -29,11 +29,11 @@ namespace PlagiarismCheckerMVC.Models
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
                 
-            // Связь между Document и DocumentCheckResult
-            modelBuilder.Entity<DocumentCheckResult>()
-                .HasOne(cr => cr.Document)
-                .WithMany()
-                .HasForeignKey(cr => cr.DocumentId)
+            // Связь между Document и DocumentCheckResult (один к одному)
+            modelBuilder.Entity<Document>()
+                .HasOne<DocumentCheckResult>(d => d.DocumentCheckResult)
+                .WithOne(cr => cr.Document)
+                .HasForeignKey<DocumentCheckResult>(cr => cr.DocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

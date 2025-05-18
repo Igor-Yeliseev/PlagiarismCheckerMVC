@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/particles.css">
     <link rel="stylesheet" href="/css/preloader.css">
     <link rel="stylesheet" href="/css/navbar-style.css">
+    <link rel="stylesheet" href="/css/formatting-rules.css">
     <!-- Предзагрузка изображений -->
     <link rel="preload" href="/images/plag-search-icon.png" as="image">
     <link rel="preload" href="/images/llms-icon.png" as="image">
@@ -48,6 +49,9 @@
         <div class="format-check-container">
             <h2>Проверить оформление документа</h2>
             
+            <!-- Блок для правил оформления будет добавлен через JavaScript для администраторов -->
+            <div id="formatting-rules-container"></div>
+            
             <div class="upload-section">
                 <button id="format-document-btn" class="btn btn-add">Загрузить документ</button>
                 <input type="file" id="format-document-file" accept=".docx" style="display: none;">
@@ -80,7 +84,10 @@
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="/js/preloader.js"></script>
     <script src="/js/particles-config.js"></script>
+    <script src="/js/jwt-helper.js"></script>
+    <script src="/js/notifications.js"></script>
     <script src="/js/auth.js"></script>
     <script src="/js/format-check.js"></script>
+    <script src="/js/formatting-rules.js"></script>
 </body>
 </html> 

@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         catch (error) {
-            console.error('Ошибка:', error);
+            console.error('Ошибка при удалении документа:', error);
             showNotification(error.message, 'error');
         }
         finally {
@@ -296,22 +296,5 @@ document.addEventListener('DOMContentLoaded', () => {
         // Удаляем обработчики, чтобы избежать множественного назначения
         yesBtn.removeEventListener('click', deleteDocument);
         noBtn.removeEventListener('click', cancelDelete);
-    }
-
-    // Функция для отображения уведомлений
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
-
-        document.body.appendChild(notification);
-
-        // Удаляем уведомление через 3 секунды
-        setTimeout(() => {
-            notification.classList.add('hiding');
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 500);
-        }, 3000);
     }
 }); 

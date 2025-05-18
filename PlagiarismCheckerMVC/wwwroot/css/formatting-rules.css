@@ -1,0 +1,121 @@
+:root {
+    --font-color: #f1f1f1;
+}
+
+/* Стили для блока правил оформления */
+.formatting-rules-block {
+    background-color: rgba(77, 95, 169, 0.350);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 30px auto;
+    padding: 20px;
+    max-width: 100%;
+    transition: all 0.3s ease;
+}
+
+.formatting-rules-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+}
+
+.formatting-rules-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--font-color);
+    margin: 0;
+}
+
+.formatting-rules-toggle {
+    background: none;
+    border: none;
+    color: var(--font-color);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+    padding: 5px;
+    outline: none;
+}
+
+.formatting-rules-toggle.collapsed {
+    transform: rotate(180deg);
+}
+
+.formatting-rules-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    max-height: 1000px;
+}
+
+.formatting-rules-content.collapsed {
+    max-height: 0;
+}
+
+.formatting-rules-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.formatting-rules-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.formatting-rules-field label {
+    font-size: 0.85rem;
+    color: var(--font-color);
+    margin-bottom: 10px;
+}
+
+.formatting-rules-field input {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.formatting-rules-field input:focus {
+    border-color: #4A90E2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.formatting-rules-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.formatting-rules-apply-btn {
+    background-color: #4A90E2;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.formatting-rules-apply-btn.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.formatting-rules-apply-btn.active:hover {
+    background-color: #3B7BC8;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 768px) {
+    .formatting-rules-fields {
+        grid-template-columns: 1fr;
+    }
+} 
