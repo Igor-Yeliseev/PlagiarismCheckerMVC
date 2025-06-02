@@ -38,6 +38,7 @@ namespace PlagiarismCheckerMVC.Services
                 Id = Guid.NewGuid(),
                 Username = request.Username,
                 Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
                 HashedPassword = hashedPassword,
                 CreatedAt = DateTime.UtcNow,
                 Role = UserRole.User

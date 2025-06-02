@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - PlagChecker</title>
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/particles.css">
+    <link rel="stylesheet" href="/css/preloader.css">
+    <link rel="stylesheet" href="/css/navbar-style.css">
+    <!-- Предзагрузка изображений -->
+    <link rel="preload" href="/images/plag-search-icon.png" as="image">
+    <link rel="preload" href="/images/llms-icon.png" as="image">
+    <link rel="preload" href="/images/plag-checker-logo.png" as="image">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Прелоадер -->
+    <div id="page-preloader">
+        <div class="preloader-spinner"></div>
+    </div>
+    
+    <!-- Контейнер для particles.js -->
+    <div id="particles-js"></div>
+    
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-left">
+                <a href="/my-documents.html" class="back-button">&#10094;</a>
+                <div class="logo-container">
+                    <img src="/images/plag-search-icon.png" alt="Search Icon" class="logo-icon" draggable="false">
+                    <img src="/images/llms-icon.png" alt="LLMs Icon" class="logo-icon" draggable="false">
+                    <img src="/images/plag-checker-logo.png" alt="PlagChecker Logo" class="logo-icon" draggable="false">
+                </div>
+            </div>
+            <div class="greeting-container">
+                <!-- Приветствие будет добавлено через JavaScript -->
+            </div>
+            <ul class="navbar-controls">
+                <!-- Кнопки навигации будут добавлены через JavaScript -->
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="form-container">
+            <h2 class="profile-title">Профиль пользователя</h2>
+            <div id="profile-block" class="profile-block" style="display: none;">
+                <div class="profile-row">
+                    <label>Логин (email):</label>
+                    <span id="profile-email"></span>
+                </div>
+                <div class="profile-row">
+                    <label>Имя пользователя:</label>
+                    <span id="profile-username"></span>
+                    <button id="edit-username-btn" class="icon-btn" title="Изменить имя"><i class="fa fa-pencil-alt"></i></button>
+                </div>
+                <div class="profile-row">
+                    <label>Номер телефона:</label>
+                    <span id="profile-phone">Не указан</span>
+                    <button id="edit-phone-btn" class="icon-btn" title="Изменить номер"><i class="fa fa-pencil-alt"></i></button>
+                </div>
+                <div class="profile-row">
+                    <label>Изменение пароля:</label>
+                    <button id="edit-password-btn" class="icon-btn" title="Изменить пароль"><i class="fa fa-pencil-alt"></i></button>
+                </div>
+                <div class="profile-row">
+                    <label>Дата регистрации:</label>
+                    <span id="profile-created"></span>
+                </div>
+                <div class="profile-row">
+                    <label>Роль:</label>
+                    <span id="profile-role"></span>
+                </div>
+            </div>
+            <div id="loading-message" style="text-align: center;">
+                <p>Загрузка данных профиля...</p>
+            </div>
+
+            <!-- Модальное окно для изменения имени пользователя -->
+            <div id="modal-username" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h3>Изменить имя пользователя</h3>
+                    <form id="edit-username-form-modal" class="edit-form-modal">
+                        <input type="text" id="edit-username-input" class="form-control" required>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn">Сохранить</button>
+                            <button type="button" id="cancel-username-btn-modal" class="btn">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Модальное окно для смены пароля -->
+            <div id="modal-password" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h3>Изменить пароль</h3>
+                    <form id="edit-password-form-modal" class="edit-form-modal">
+                        <input type="password" id="current-password" class="form-control" placeholder="Текущий пароль" required>
+                        <input type="password" id="new-password" class="form-control" placeholder="Новый пароль" minlength="6" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z0-9]).{6,}$">
+                        <div class="modal-actions">
+                            <button type="submit" class="btn">Сохранить</button>
+                            <button type="button" id="cancel-password-btn-modal" class="btn">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Модальное окно для изменения номера телефона -->
+            <div id="modal-phone" class="modal" style="display:none;">
+                <div class="modal-content">
+                    <h3>Изменить номер телефона</h3>
+                    <form id="edit-phone-form-modal" class="edit-form-modal">
+                        <input type="tel" id="edit-phone-input" class="form-control" placeholder="+375 (xx) 123-45-67" pattern="\+375 \([0-9]{2}\) [0-9]{3}-[0-9]{2}-[0-9]{2}" required>
+                        <div class="modal-actions">
+                            <button type="submit" class="btn">Сохранить</button>
+                            <button type="button" id="cancel-phone-btn-modal" class="btn">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .profile-title {
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .profile-block {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 30px 20px 10px 20px;
+        }
+        .profile-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .profile-row label {
+            font-weight: bold;
+            min-width: 160px;
+            margin-right: 16px;
+            text-align: right;
+            display: inline-block;
+            color: #00dbf8;
+        }
+        .profile-row span {
+            color: #f1f1f1;
+        }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #00bcd4;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+        .icon-btn:focus {
+            outline: 2px solid #00c8e3;
+            outline: none;
+            box-shadow: none;
+        }
+        .edit-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            align-items: center;
+        }
+        .btn-cancel {
+            background: #eee;
+            color: #333;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            background: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background: #222;
+            margin: 60px auto;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            min-width: 300px;
+            position: relative;
+            color: #fff;
+        }
+        .close {
+            position: absolute;
+            right: 18px;
+            top: 12px;
+            font-size: 1.5em;
+            color: #00bcd4;
+            cursor: pointer;
+        }
+        .edit-form-modal {
+            display: flex;
+            flex-direction: column;
+            gap: 2em;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: flex-end;
+        }
+    </style>
+    
+    <!-- Подключение скриптов -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="/js/preloader.js"></script>
+    <script src="/js/particles-config.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/notifications.js"></script>
+    <script src="/js/profile.js"></script>
+</body>
+</html> 

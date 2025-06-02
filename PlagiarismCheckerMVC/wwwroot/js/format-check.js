@@ -45,6 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
     closeFileBtn.addEventListener('click', function () {
         selectedFileContainer.style.display = 'none';
         fileInput.value = ''; // Сбрасываем выбранный файл
+        if (timerContainer) {
+            timerContainer.style.display = 'none';
+        }
     });
 
     // Обработчик выбора файла
@@ -70,24 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const spinner = document.getElementById('format-spinner');
         spinner.style.display = 'flex';
 
-        // Запускаем таймер
         startTimer();
 
         // Скрываем кнопку отправки, чтобы избежать повторных отправок
         submitButton.disabled = true;
-
-        // Имитация задержки загрузки (3 секунды)
-        // setTimeout(() => {
-        //     // Скрываем спиннер и разблокируем кнопку
-        //     spinner.style.display = 'none';
-        //     submitButton.disabled = false;
-
-        //     // Останавливаем таймер
-        //     stopTimer();
-
-        //     // Показываем сообщение
-        //     alert('Файл был отправлен');
-        // }, 3000);
 
         const formData = new FormData();
         formData.append('file', file);

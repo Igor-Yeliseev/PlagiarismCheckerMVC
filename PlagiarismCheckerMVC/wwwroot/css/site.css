@@ -293,8 +293,8 @@ body {
     padding: 20px;
     margin-bottom: 10vh;
     border-radius: var(--border-radius);
-    width: 500px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+    /* width: 500px; */
+    color: white;
 }
 
 .modal-buttons{
@@ -697,6 +697,27 @@ body {
     box-shadow: var(--box-shadow);
 }
 
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-container .form-control {
+    background-color: white;
+    border: none;
+    color: #333;
+    height: 50px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-container .form-control::placeholder {
+    color: #999;
+}
+
 .form-container h3 {
     margin-bottom: 20px;
     font-size: 22px;
@@ -746,13 +767,6 @@ input[type="radio"]:checked + label {
     font-weight: bold;
 }
 
-/* Для случая, если label не сразу после input, а вложен в .radio-option */
-/* .radio-option input[type="radio"]:checked + label,
-.radio-option input[type="radio"]:checked ~ label {
-    color: #e74c3c;
-    font-weight: bold;
-} */
-
 /* Вспомогательные классы */
 .text-center {
     text-align: center;
@@ -769,17 +783,7 @@ input[type="radio"]:checked + label {
     /* position: relative; */
     /* width: 180px; */
     padding: 0 !important;
-
-    /* white-space: nowrap; */
-    /* background-color: transparent !important;
-    border: none !important; */
 }
-
-/* th.actions-column, td.actions-cell {
-    width: 180px !important;
-    min-width: 180px !important;
-    max-width: 180px !important;
-} */
 
 .record-actions {
     display: flex;
@@ -828,6 +832,21 @@ input[type="radio"]:checked + label {
 
 .action-delete:hover svg {
     color: #f2402c;
+}
+
+.disabled-btn {
+    background-color: #cccccc !important;
+    color: #888888 !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+}
+.disabled-btn:hover, .disabled-btn:focus {
+    background-color: #cccccc !important;
+    color: #888888 !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 

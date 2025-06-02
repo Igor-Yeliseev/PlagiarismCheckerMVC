@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS "Users" (
     "Id" UUID PRIMARY KEY,
     "Username" VARCHAR(50) NOT NULL,
     "Email" VARCHAR(100) NOT NULL,
+    "PhoneNumber" VARCHAR(20) NULL,
     "HashedPassword" TEXT NOT NULL,
     "CreatedAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "Role" VARCHAR(50) NOT NULL DEFAULT 'user'
+    "Role" INTEGER NOT NULL DEFAULT 0
 );
 
 -- Добавление уникального индекса на Email
@@ -66,9 +67,10 @@ COMMENT ON TABLE "Users" IS 'Таблица пользователей сист�
 COMMENT ON COLUMN "Users"."Id" IS 'Уникальный идентификатор пользователя';
 COMMENT ON COLUMN "Users"."Username" IS 'Имя пользователя';
 COMMENT ON COLUMN "Users"."Email" IS 'Email пользователя (используется для входа)';
+COMMENT ON COLUMN "Users"."PhoneNumber" IS 'Необязательный номер телефона пользователя';
 COMMENT ON COLUMN "Users"."HashedPassword" IS 'Хешированный пароль пользователя';
 COMMENT ON COLUMN "Users"."CreatedAt" IS 'Дата и время создания учетной записи';
-COMMENT ON COLUMN "Users"."Role" IS 'Роль пользователя в системе';
+COMMENT ON COLUMN "Users"."Role" IS 'Роль пользователя: 0 = User, 1 = Admin';
 
 COMMENT ON TABLE "Documents" IS 'Таблица документов для проверки на плагиат';
 COMMENT ON COLUMN "Documents"."Id" IS 'Уникальный идентификатор документа';

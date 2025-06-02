@@ -78,16 +78,34 @@ function createFormattingRulesBlock() {
     
     content.appendChild(fieldsContainer);
     
-    // Контейнер для кнопки "Применить"
+    // Контейнер для кнопок
     const actionsContainer = document.createElement('div');
     actionsContainer.className = 'formatting-rules-actions';
     
+    // Кнопка "Применить"
     const applyButton = document.createElement('button');
     applyButton.className = 'formatting-rules-apply-btn';
     applyButton.textContent = 'Применить';
     applyButton.setAttribute('id', 'apply-formatting-rules');
     
+    // Создаем скрытый input для выбора файла
+    const fileInput = document.createElement('input');
+    fileInput.setAttribute('type', 'file');
+    fileInput.setAttribute('id', 'word-document-upload');
+    fileInput.setAttribute('accept', '.docx');
+    fileInput.style.display = 'none';
+    
+    // Кнопка "Задать через документ"
+    const uploadDocButton = document.createElement('button');
+    uploadDocButton.className = 'formatting-rules-upload-btn';
+    uploadDocButton.textContent = 'Задать через документ';
+    uploadDocButton.setAttribute('id', 'upload-document-rules');
+    
+    // Добавляем кнопки и input в контейнер
     actionsContainer.appendChild(applyButton);
+    actionsContainer.appendChild(uploadDocButton);
+    actionsContainer.appendChild(fileInput);
+    
     content.appendChild(actionsContainer);
     
     // Добавляем все элементы в блок
@@ -96,6 +114,12 @@ function createFormattingRulesBlock() {
     
     // Добавляем блок в контейнер
     container.appendChild(formattingRulesBlock);
+    
+    // Создаем модальное окно подтверждения
+    const confirmModal = document.getElementById('confirm-modal');
+    const yesBtn = document.getElementById('yes-btn');
+    const noBtn = document.getElementById('no-btn');
+    let selectedFile = null;
     
     // Обработчик для кнопки сворачивания/разворачивания
     toggleButton.addEventListener('click', function() {
@@ -123,6 +147,45 @@ function createFormattingRulesBlock() {
         
         // Отправляем данные на сервер
         sendFormattingRules(formattingRules);
+    });
+    
+    // Обработчик для кнопки "Задать через документ"
+    uploadDocButton.addEventListener('click', function() {
+        // Активируем скрытое поле для выбора файла
+        fileInput.click();
+    });
+    
+    // Обработчик изменения выбранного файла
+    fileInput.addEventListener('change', function(event) {
+        if (event.target.files.length > 0) {
+            // Сохраняем выбранный файл
+            selectedFile = event.target.files[0];
+            
+            // Показываем модальное окно подтверждения
+            confirmModal.style.display = 'flex';
+        }
+    });
+    
+    // Обработчик для кнопки "Да" в модальном окне
+    yesBtn.addEventListener('click', function() {
+        // Скрываем модальное окно
+        confirmModal.style.display = 'none';
+        
+        // Отправляем файл на сервер, если он выбран
+        if (selectedFile) {
+            uploadDocumentForRules(selectedFile);
+            selectedFile = null; // Сбрасываем выбранный файл
+        }
+    });
+    
+    // Обработчик для кнопки "Нет" в модальном окне
+    noBtn.addEventListener('click', function() {
+        // Скрываем модальное окно
+        confirmModal.style.display = 'none';
+        
+        // Сбрасываем выбранный файл и input
+        selectedFile = null;
+        fileInput.value = '';
     });
     
     // Загружаем текущие правила с сервера
@@ -195,7 +258,7 @@ function sendFormattingRules(rules) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify(JSON.stringify(rules))
+        body: JSON.stringify(rules)
     })
     .then(response => {
         if (!response.ok) {
@@ -218,11 +281,51 @@ function sendFormattingRules(rules) {
             applyButton.classList.remove('active');
         }
         
-        // Показываем уведомление об успешном сохранении
         showNotification('Правила оформления успешно сохранены', 'success');
     })
     .catch(error => {
         console.error('Ошибка при сохранении правил:', error);
         showNotification('Ошибка при сохранении правил оформления', 'error');
+    });
+}
+
+/**
+ * Загружает Word-документ для извлечения из него правил форматирования
+ * @param {File} file - Word-документ для загрузки
+ */
+function uploadDocumentForRules(file) {
+    // Создаем объект FormData для отправки файла
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Отправляем файл на сервер
+    fetch('https://localhost:7060/word-formatting-api/get-rules-from-file', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка при загрузке документа');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Object.keys(data).forEach(key => {
+        //     const input = document.getElementById(key);
+        //     if (input) {
+        //         input.value = data[key];
+        //         // Сохраняем исходное значение для сравнения
+        //         input.setAttribute('data-original', data[key]);
+        //     }
+        // });
+        
+        showNotification('Правила форматирования успешно извлечены из документа', 'success');
+    })
+    .catch(error => {
+        console.error('Ошибка при загрузке документа:', error);
+        showNotification('Ошибка при загрузке документа', 'error');
     });
 } 

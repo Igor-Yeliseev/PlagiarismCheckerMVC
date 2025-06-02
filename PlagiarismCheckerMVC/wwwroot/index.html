@@ -22,7 +22,6 @@
             padding-top: 50px;
         }
         
-        
         .features {
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
@@ -59,6 +58,63 @@
             font-weight: bold;
             font-size: 18px;
         }
+        
+        .contacts-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .contacts-modal.active {
+            display: flex;
+        }
+        .contacts-modal-content {
+            background: #f3efff;
+            color: #222;
+            border-radius: 10px;
+            padding: 32px 24px;
+            min-width: 320px;
+            max-width: 90vw;
+            margin: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .contacts-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s, transform 0.15s;
+        }
+        .contacts-modal-close:hover {
+            color: #e53935;
+            background: #fff0f0;
+            transform: scale(1.18);
+        }
+        .contacts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .contacts-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .icon img {
+            width: 32px;
+            height: 32px;
+            mix-blend-mode: multiply;
+        }
     </style>
 </head>
 <body>
@@ -91,41 +147,68 @@
     
     <div class="main-content">
         <div class="container">
-            <h1>PlagChecker</h1>
+            <h1>PlagiarismCheckerMVC</h1>
             <p style="font-size: 20px; margin-top: 15px;">Интеллектуальный сервис для поиска плагиата в документах</p>
-            
-            <div class="nav-menu">
-                <div class="nav-item">
-                    <a href="/check-plagiarism">Проверить текст</a>
-                </div>
-                <div class="nav-item">
-                    <a href="/my-documens">Мои документы</a>
-                </div>
-                <div class="nav-item">
-                    <a href="#about">О сервисе</a>
-                </div>
-            </div>
             
             <div class="features" id="about">
                 <h2>Поиск плагиата в Word-документах</h2>
-                <p>PlagChecker - это сервис, который поможет вам проверить ваши документы на наличие плагиата с использованием мощных поисковых систем.</p>
-                
+                <br/>
+                <p style="font-size: 18px; text-align: justify;text-indent: 40px;">Данный сервис поможет проверить ваши документы на наличие плагиата с использованием мощных поисковых систем, а также нейронных сетей. Помимо этого, сервис проверяет форматирование пояснительных записок студентов на соответствие требованиям.</p>
+                <br/>
                 <h3>Возможности:</h3>
                 <ul style="text-align: left; display: inline-block;">
                     <li>Проверка документов Word формата .docx</li>
-                    <li>Использование API Google и Яндекс для поиска</li>
-                    <li>Разбивка текста на абзацы и предложения</li>
-                    <li>Удаление стоп-слов для повышения точности</li>
+                    <li>Использование API Google и Яндекс для поиска заимствований</li>
+                    <li>Использование sentence-transformers для поиска в базе данных</li>
                     <li>Подробные отчеты с указанием источников заимствования</li>
+                    <li>Проверка оформления документов с помощью Office Open XML</li>
                 </ul>
-                
-                <div style="margin-top: 30px;">
-                    <a href="/register" class="btn">Начать использовать</a>
+            </div>
+            <div style="text-align:center; margin-top:40px;">
+                <button id="contacts-btn" class="btn" style="font-size:18px;">Контакты</button>
+            </div>
+            <!-- Модальное окно для контактов -->
+            <div id="contacts-modal" class="contacts-modal">
+                <div class="contacts-modal-content">
+                    <button id="close-contacts" class="contacts-modal-close">&times;</button>
+                    <h2 style="margin-bottom:24px; text-align:center;">Контакты</h2>
+                    <div class="contacts-list">
+                        <div class="contacts-item">
+                            <span class="icon"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"></span>
+                            <span style="font-size:18px;">Telegram: <a href="https://t.me/igor_yelis" target="_blank">@igor_yelis</a></span>
+                        </div>
+                        <div class="contacts-item">
+                            <span class="icon"><img src="/images/gstu-it-logo.jpg" alt="GSTU"></span>
+                            <span style="font-size:18px;">GSTU: <a href="mailto:igor-yelis24@edu.gstu.by">igor-yelis24@edu.gstu.by</a></span>
+                        </div>
+                        <div class="contacts-item">
+                            <span class="icon"><img src="https://images.seeklogo.com/logo-png/38/2/a1-telekom-austria-logo-png_seeklogo-385327.png" alt="A1"></span>
+                            <span style="font-size:18px;">A1: <a href="tel:+375291551696">+375 (29) 155-16-96</a></span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var contactsBtn = document.getElementById('contacts-btn');
+            var contactsModal = document.getElementById('contacts-modal');
+            var closeContacts = document.getElementById('close-contacts');
+            if (contactsBtn && contactsModal && closeContacts) {
+                contactsBtn.onclick = function() {
+                    contactsModal.style.display = 'flex';
+                };
+                closeContacts.onclick = function() {
+                    contactsModal.style.display = 'none';
+                };
+                contactsModal.onclick = function(e) {
+                    if (e.target === contactsModal) contactsModal.style.display = 'none';
+                };
+            }
+        });
+    </script>
     <!-- Подключение скриптов -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="/js/preloader.js"></script>

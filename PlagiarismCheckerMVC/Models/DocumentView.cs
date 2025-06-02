@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace PlagiarismCheckerMVC.Models
 {
-    public class DocumentDTO
+    public class DocumentView
     {
         [JsonPropertyName("id")]
         public Guid Id { get; set; }

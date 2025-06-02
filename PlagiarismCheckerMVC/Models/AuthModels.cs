@@ -13,6 +13,10 @@ namespace PlagiarismCheckerMVC.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
         
+        [Phone]
+        [MaxLength(20)]
+        public string? PhoneNumber { get; set; }
+        
         [Required]
         [MinLength(6)]
         public string Password { get; set; } = string.Empty;

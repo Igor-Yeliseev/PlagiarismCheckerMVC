@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PlagiarismCheckerMVC.Models;
+using System.Net.Http;
 
 namespace PlagiarismCheckerMVC.Services
 {
@@ -11,27 +12,27 @@ namespace PlagiarismCheckerMVC.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IStorageService _storageService;
+        private readonly HttpClient _httpClient;
 
         public DocumentService(ApplicationDbContext context, IStorageService storageService)
         {
             _context = context;
             _storageService = storageService;
+            _httpClient = new HttpClient();
         }
 
         public async Task<Document> UploadAsync(IFormFile file, Guid userId)
         {
             // Проверяем количество документов пользователя
-            int userDocumentsCount = await GetDocumentCountByUserIdAsync(userId);
+            int userDocumentsCount = await GetUserDocumentCountAsync(userId);
             if (userDocumentsCount >= 4)
             {
                 throw new InvalidOperationException("Вы достигли максимального количества документов (4)");
             }
 
-            // Загружаем файл в хранилище
-            string fileUrl = await _storageService.UploadFileAsync(file, $"user_{userId}");
+            string fileUrl = await _storageService.UploadFileAsync(file, $"user_{userId}"); // Загружаем файл в хранилище
 
-            // Создаем запись в базе данных
-            var document = new Document
+            var document = new Document // Создаем запись в базе данных
             {
                 Id = Guid.NewGuid(),
                 Name = file.FileName,
@@ -44,7 +45,27 @@ namespace PlagiarismCheckerMVC.Services
             await _context.Documents.AddAsync(document);
             await _context.SaveChangesAsync();
 
+            await SendDocToDbPyApiAsync(file); // Отправить документ в Python WebAPI для расчёта хешей и эмбеддингов
+
             return document;
+        }
+
+        private async Task SendDocToDbPyApiAsync(IFormFile file)
+        {
+            try
+            {
+                // Плейсхолдер адреса
+                var apiUrl = "http://localhost:5000//py-api/new-doc";
+                using var content = new MultipartFormDataContent();
+                using var stream = file.OpenReadStream();
+                content.Add(new StreamContent(stream), "file", file.FileName);
+                var response = await _httpClient.PostAsync(apiUrl, content);
+            }
+            catch (Exception ex)
+            {
+                // Логировать ошибку, но не прерывать основной процесс
+                System.Diagnostics.Debug.WriteLine($"Ошибка при отправке файла в Python API: {ex.Message}");
+            }
         }
 
         public async Task<IEnumerable<Document>> GetUserDocumentsAsync(Guid userId)
@@ -55,7 +76,7 @@ namespace PlagiarismCheckerMVC.Services
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<DocumentDTO>> GetUserDocumentsWithOriginalityAsync(Guid userId)
+        public async Task<IEnumerable<DocumentView>> GetUserDocumentsWithOriginalityAsync(Guid userId)
         {
             // Получаем все документы пользователя
             var documents = await _context.Documents
@@ -63,7 +84,7 @@ namespace PlagiarismCheckerMVC.Services
                 .OrderByDescending(d => d.CreatedAt)
                 .ToListAsync();
 
-            var result = new List<DocumentDTO>();
+            var result = new List<DocumentView>();
 
             foreach (var doc in documents)
             {
@@ -73,8 +94,7 @@ namespace PlagiarismCheckerMVC.Services
                     .OrderByDescending(cr => cr.CheckedAt) // Берем самый последний результат проверки
                     .FirstOrDefaultAsync();
 
-                // Создаем DTO объект
-                var docDto = new DocumentDTO
+                var docDto = new DocumentView
                 {
                     Id = doc.Id,
                     Name = doc.Name,
@@ -112,7 +132,7 @@ namespace PlagiarismCheckerMVC.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<int> GetDocumentCountByUserIdAsync(Guid userId)
+        public async Task<int> GetUserDocumentCountAsync(Guid userId)
         {
             return await _context.Documents.CountAsync(d => d.UserId == userId);
         }

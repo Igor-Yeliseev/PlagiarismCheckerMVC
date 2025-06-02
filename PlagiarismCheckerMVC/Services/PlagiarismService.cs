@@ -17,6 +17,7 @@ using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using FuzzySharp.SimilarityRatio.Scorer.StrategySensitive;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace PlagiarismCheckerMVC.Services
 {
@@ -26,6 +27,7 @@ namespace PlagiarismCheckerMVC.Services
         private readonly IStorageService _storageService;
         private readonly ISearchService _searchService;
         private readonly PlagiarismSettings _plagiarismSettings;
+        private readonly HttpClient _httpClient;
         
         // Поле для хранения текущего процента заимствований (умноженное на 100 для точности до сотых)
         private long _plagiarismPercentage;
@@ -46,6 +48,7 @@ namespace PlagiarismCheckerMVC.Services
             _storageService = storageService;
             _searchService = searchService;
             _plagiarismSettings = plagiarismSettings.Value;
+            _httpClient = new HttpClient();
         }
 
         /// <summary> Проверяет документ на плагиат и возвращает отчет</summary>
@@ -65,13 +68,16 @@ namespace PlagiarismCheckerMVC.Services
 
                 var results = SearchPlag(paragraphs, searchEngineType); // Проверяем на плагиат
 
+                // Проверяем уникальность через внешний API
+                var dbCheckResult = await CheckPlagDbAsync(docStream);
+                
                 return new DocCheckReport
                 {
                     DocumentName = document.Name,
                     Results = results,
                     CheckedAt = DateTime.UtcNow,
                     SearchEngine = searchEngineType.ToString(),
-                    PlagiarismPercentage = (decimal)_plagiarismPercentage / 100
+                    PlagiarismPercentage = Math.Max((decimal)_plagiarismPercentage / 100, 100 - dbCheckResult)
                 };
             }
             catch (Exception)
@@ -94,6 +100,9 @@ namespace PlagiarismCheckerMVC.Services
                 // Проверяем на плагиат
                 var results = SearchPlag(paragraphs, searchEngineType);
                 
+                // Проверяем уникальность через внешний API
+                var dbCheckResult = CheckPlagDbAsync(docStream).GetAwaiter().GetResult();
+                
                 // Формируем отчет
                 return new DocCheckReport
                 {
@@ -101,12 +110,63 @@ namespace PlagiarismCheckerMVC.Services
                     Results = results,
                     CheckedAt = DateTime.UtcNow,
                     SearchEngine = searchEngineType.ToString(),
-                    PlagiarismPercentage = (decimal)_plagiarismPercentage / 100
+                    PlagiarismPercentage = Math.Max((decimal)_plagiarismPercentage / 100, 100 - dbCheckResult)
                 };
             }
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        /// <summary> Проверяет документ на плагиат через внешний API и возвращает процент уникальности</summary>
+        private async Task<decimal> CheckPlagDbAsync(Stream docStream)
+        {
+            try
+            {
+                // Сбрасываем позицию потока перед чтением
+                docStream.Position = 0;
+                
+                // Создаем контент для отправки
+                var content = new MultipartFormDataContent();
+                var streamContent = new StreamContent(docStream);
+                content.Add(streamContent, "file", "document.docx");
+                
+                // Отправляем запрос на внешний API
+                var response = await _httpClient.PostAsync("http://localhost:5000/py-api/check-with-db", content);
+                
+                // Если запрос неуспешен, возвращаем 100% уникальности (0% плагиата)
+                if (!response.IsSuccessStatusCode)
+                {
+                    return 100m;
+                }
+                
+                // Читаем ответ
+                var jsonString = await response.Content.ReadAsStringAsync();
+                using JsonDocument doc = JsonDocument.Parse(jsonString);
+                
+                // Получаем процент уникальности (предполагается, что API возвращает uniqueness_percentage)
+                if (doc.RootElement.TryGetProperty("uniqueness_percentage", out JsonElement element) && 
+                    element.TryGetDecimal(out decimal uniquenessPercentage))
+                {
+                    return uniquenessPercentage;
+                }
+                
+                // По умолчанию возвращаем 100% уникальности, если не удалось получить данные
+                return 100m;
+            }
+            catch (Exception ex)
+            {
+                // Логируем ошибку
+                Debug.WriteLine($"Ошибка при проверке документа через внешний API: {ex.Message}");
+                
+                // Возвращаем 100% уникальности в случае ошибки
+                return 100m;
+            }
+            finally
+            {
+                // Сбрасываем позицию потока для дальнейшего использования
+                docStream.Position = 0;
             }
         }
 

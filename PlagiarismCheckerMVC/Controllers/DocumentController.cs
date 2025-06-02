@@ -53,7 +53,7 @@ namespace PlagiarismCheckerMVC.Controllers
         }
 
         [HttpGet("documents")]
-        public async Task<ActionResult<IEnumerable<DocumentDTO>>> GetUserDocuments()
+        public async Task<ActionResult<IEnumerable<DocumentView>>> GetUserDocuments()
         {
             try
             {

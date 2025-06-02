@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // Получаем выбранный поисковый движок перед отправкой файла
         const searchEngine = document.querySelector('input[name="searchEngine"]:checked').value;
 
-        await sendToServer(file, searchEngine);
+        await sendToPlagCheck(file, searchEngine);
     });
 
     // Функция для отправки документа на сервер
-    async function sendToServer(file, searchEngine) {
+    async function sendToPlagCheck(file, searchEngine) {
         try {
             const formContainer = document.getElementById('check-form-container');
             closeFileBtn.style.display = 'none';

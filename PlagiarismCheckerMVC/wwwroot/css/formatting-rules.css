@@ -87,7 +87,10 @@
 
 .formatting-rules-actions {
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
 
 .formatting-rules-apply-btn {
@@ -113,9 +116,36 @@
     background-color: #3B7BC8;
 }
 
+.formatting-rules-upload-btn {
+    background-color: #4A90E2;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    transition: background-color 0.3s ease;
+}
+
+.formatting-rules-upload-btn:hover {
+    background-color: #3B7BC8;
+}
+
 /* Медиа-запросы для адаптивности */
 @media (max-width: 768px) {
     .formatting-rules-fields {
         grid-template-columns: 1fr;
+    }
+    
+    .formatting-rules-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .formatting-rules-upload-btn,
+    .formatting-rules-apply-btn {
+        width: 100%;
+        margin-bottom: 8px;
     }
 } 

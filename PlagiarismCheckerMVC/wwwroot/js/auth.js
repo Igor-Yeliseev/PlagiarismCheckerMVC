@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value || null;
+            
+            // Проверка пароля: минимум 6 символов, латинские строчные и заглавные буквы, хотя бы один алфавитно-цифровой символ
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z0-9]).{6,}$/;
+            if (!passwordRegex.test(password)) {
+                alert('Пароль должен содержать минимум 6 символов, латинские строчные и заглавные буквы, а также хотя бы один алфавитно-цифровой символ.');
+                e.preventDefault();
+                return;
+            }
             
             try {
                 const response = await fetch('/plag-api/register', {
@@ -15,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ username, email, password, phoneNumber: phone })
                 });
                 
                 const data = await response.json();
@@ -106,15 +115,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentPage = window.location.pathname;
             
             // Определяем, какая кнопка должна быть активной
-            const isProfilePage = currentPage.includes('my-documents');
+            const isDocumentsPage = currentPage.includes('my-documents');
             const isCheckPage = currentPage.includes('plag-check-new');
             const isFormatPage = currentPage.includes('format-check');
+            const isProfilePage = currentPage.includes('profile');
             
             // Обновляем навигационные кнопки для авторизованного пользователя
             navbarControls.innerHTML = `
                 <li><a href="/plag-check-new.html" class="nav-button ${isCheckPage ? 'active' : ''}">Плагиат</a></li>
-                <li><a href="/my-documents.html" class="nav-button ${isProfilePage ? 'active' : ''}">Мои документы</a></li>
+                <li><a href="/my-documents.html" class="nav-button ${isDocumentsPage ? 'active' : ''}">Мои документы</a></li>
                 <li><a href="/format-check.html" class="nav-button ${isFormatPage ? 'active' : ''}">Оформление</a></li>
+                <li><a href="/profile.html" class="nav-button ${isProfilePage ? 'active' : ''}">Профиль</a></li>
                 <li><a href="#" id="logout" class="nav-button">Выйти</a></li>
             `;
         }
