@@ -26,15 +26,15 @@ namespace PlagiarismCheckerMVC.Models
         public int ResultsCount { get; set; } = 10;
     }
 
-    public class PlagiarismSettings
+    public class ParagraphSettings
     {
-        /// <summary> ����������� ���������� ����������� � ������ </summary>
+        /// <summary> Минимальное количество предложений в параграфе </summary>
         public int SentMinCount { get; set; }
 
-        /// <summary> ����������� ���������� �������� � ������ </summary>
+        /// <summary> Минимальное количество символов в параграфе </summary>
         public int ParaMinChars { get; set; }
 
-        /// <summary> ����������� ���������� �������� � ����������� </summary>
+        /// <summary> Минимальное количество символов в предложении </summary>
         public int SentMinChars { get; set; }
     }
 }

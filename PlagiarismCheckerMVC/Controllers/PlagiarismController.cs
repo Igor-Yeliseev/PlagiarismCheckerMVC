@@ -1,16 +1,16 @@
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlagiarismCheckerMVC.Models;
 using PlagiarismCheckerMVC.Services;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
 using System.Linq;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -64,7 +64,6 @@ namespace PlagiarismCheckerMVC.Controllers
         }
 
         [HttpPost("check-new")]
-        //public async Task<ActionResult<DocCheckReport>> CheckPlagiarism([FromForm] IFormFile docFile, [FromForm] string searchEngine)
         public ActionResult<DocCheckReport> CheckPlagiarism([FromForm] IFormFile docFile, [FromForm] string searchEngine)
         {
             try
@@ -88,15 +87,14 @@ namespace PlagiarismCheckerMVC.Controllers
                 docFile.CopyTo(fileStream);
                 fileStream.Position = 0;
 
-                int characterCount = CountCharacters(fileStream);
+                int characterCount = DocumentService.CountCharacters(fileStream);
                 if (characterCount < 1000 || characterCount > 40000)
                 {
-                    return BadRequest(new { message = $"Текст не соответствует требованиям. Минимум 1000 символов, максимум 40000 символов. Найдено: {characterCount} символов" });
+                    // return BadRequest(new { message = $"Текст не соответствует требованиям. Минимум 1000 символов, максимум 40000 символов. Найдено: {characterCount} символов" });
                 }
 
                 fileStream.Position = 0;
-                var checkReport = _plagiarismService.CheckDocument(fileStream, searchEngineType);
-                // Обновляем имя документа
+                var checkReport = _plagiarismService.CheckLocalDocumentAsync(fileStream, searchEngineType);
                 checkReport.DocumentName = docFile.FileName;
 
                 return Ok(checkReport);
@@ -111,6 +109,7 @@ namespace PlagiarismCheckerMVC.Controllers
             }
         }
 
+        [Obsolete]
         private decimal CalculateOriginalityPercentage(List<QuerySearchResult> results)
         {
             if (results == null || !results.Any())
@@ -136,50 +135,6 @@ namespace PlagiarismCheckerMVC.Controllers
                 throw new InvalidOperationException("Невозможно определить идентификатор пользователя");
             }
             return userId;
-        }
-
-        /// <summary> Подсчитывает количество символов в документе</summary>
-        private int CountCharacters(Stream documentStream)
-        {
-            int totalCharacters = 0;
-
-            // Запоминаем текущую позицию в потоке
-            long originalPosition = documentStream.Position;
-
-            try
-            {
-                // Сбрасываем позицию потока в начало
-                documentStream.Position = 0;
-
-                using (WordprocessingDocument document = WordprocessingDocument.Open(documentStream, false))
-                {
-                    var body = document?.MainDocumentPart?.Document.Body;
-                    if (body == null)
-                        return 0;
-
-                    // Получаем количество символов через ExtendedFilePropertiesPart, если возможно
-                    var extProps = document?.ExtendedFilePropertiesPart;
-                    if (extProps != null &&
-                        extProps.Properties?.Characters != null &&
-                        int.TryParse(extProps.Properties.Characters.Text, out int charCountFromProps))
-                    {
-                        totalCharacters = charCountFromProps;
-                    }
-                    else
-                    {
-                        // Fallback: считаем вручную
-                        string fullText = string.Join("", body.Descendants<Text>().Select(t => t.Text));
-                        totalCharacters = fullText.Length;
-                    }
-                }
-
-                return totalCharacters;
-            }
-            finally
-            {
-                // Восстанавливаем исходную позицию потока
-                documentStream.Position = originalPosition;
-            }
         }
     }
 }

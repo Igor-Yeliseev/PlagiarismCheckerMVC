@@ -121,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Получаем ID проверки и перенаправляем на страницу результатов
             const result = await response.json();
-            //window.location.href = `/check-uploaded.html?id=${result.id}`;
+            //window.location.href = `/check-uploaded.html?id=${results.id}`;
             
-            // Останавливаем таймер
             stopTimer();
 
-            alert("Проверка завершена");
             formContainer.innerHTML = originalContent; // Удаляем спиннер и восстанавливаем форму
+            
+            renderResultsTable(result);
         }
         catch (error) {
             console.error('Ошибка:', error);
@@ -138,5 +138,39 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification('Ошибка при проверке документа', 'error');
             location.reload(); // Восстанавливаем форму
         }
+    }
+
+    // Функция для отображения таблицы результатов проверки на плагиат
+    function renderResultsTable(report) {
+        let container = document.getElementById('plag-results-table-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'plag-results-table-container';
+            // Вставляем после формы
+            const formContainer = document.getElementById('check-form-container');
+            formContainer.parentNode.insertBefore(container, formContainer.nextSibling);
+        }
+        if (!report || !report.queryResults || !Array.isArray(report.queryResults) || report.queryResults.length === 0) {
+            container.innerHTML = '<p>Результаты не найдены.</p>';
+            return;
+        }
+        let html = `<h3>Результаты проверки</h3>`;
+        if (report.plagiarismPercentage) {
+            if (report.plagiarismPercentage.webPlagPercentage !== undefined && report.plagiarismPercentage.webPlagPercentage !== null) {
+                html += `<p>Web-плагиат: <b>${(report.plagiarismPercentage.webPlagPercentage * 100).toFixed(1)}%</b></p>`;
+            }
+        }
+        html += `<table class="plag-results-table"><thead><tr><th>Параграф</th><th>Предложение</th><th>Источник</th><th>Заголовок</th><th>Сходство</th></tr></thead><tbody>`;
+        for (const r of report.queryResults) {
+            html += `<tr>`;
+            html += `<td>${r.paraNum ?? ''}</td>`;
+            html += `<td>${r.sentNum ?? ''}</td>`;
+            html += `<td><a href="${r.sourceUrl}" target="_blank">${r.sourceUrl}</a></td>`;
+            html += `<td>${r.sourceTitle ?? ''}</td>`;
+            html += `<td>${(r.similarityScore * 100).toFixed(1)}%</td>`;
+            html += `</tr>`;
+        }
+        html += `</tbody></table>`;
+        container.innerHTML = html;
     }
 }); 

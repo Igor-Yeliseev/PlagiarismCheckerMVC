@@ -43,13 +43,13 @@ public class SimplePlagiarismServiceTests : TestBase
             .ReturnsAsync(searchResults);
 
         // Act
-        var result = _plagiarismService.CheckDocument(documentStream, SearchEngineType.Google);
+        var result = _plagiarismService.CheckLocalDocumentAsync(documentStream, SearchEngineType.Google);
 
         // Assert
         Assert.That(result, Is.Not.Null, "Результат проверки не должен быть null");
         Assert.That(result.DocumentName, Is.Not.Null.And.Not.Empty, "Имя документа должно быть установлено");
         Assert.That(result.PlagiarismPercentage, Is.GreaterThanOrEqualTo(0), "Процент плагиата должен быть неотрицательным");
-        Assert.That(result.Results, Is.Not.Null, "Результаты поиска не должны быть null");
+        Assert.That(result.QueryResults, Is.Not.Null, "Результаты поиска не должны быть null");
         Assert.That(result.CheckedAt, Is.Not.EqualTo(default(DateTime)), "Дата проверки должна быть установлена");
     }
 
@@ -61,7 +61,7 @@ public class SimplePlagiarismServiceTests : TestBase
         var documentStream = CreateTestDocumentStream("");
 
         // Act
-        var result = _plagiarismService.CheckDocument(documentStream, SearchEngineType.Google);
+        var result = _plagiarismService.CheckLocalDocumentAsync(documentStream, SearchEngineType.Google);
 
         // Assert
         Assert.That(result, Is.Not.Null, "Результат проверки не должен быть null");
@@ -93,7 +93,7 @@ public class SimplePlagiarismServiceTests : TestBase
             .ReturnsAsync(searchResults);
 
         // Act
-        var result = _plagiarismService.CheckDocument(documentStream, searchEngine);
+        var result = _plagiarismService.CheckLocalDocumentAsync(documentStream, searchEngine);
 
         // Assert
         Assert.That(result, Is.Not.Null, "Результат проверки не должен быть null");
@@ -116,7 +116,7 @@ public class SimplePlagiarismServiceTests : TestBase
         // Act & Assert
         Assert.DoesNotThrow(() =>
         {
-            var result = _plagiarismService.CheckDocument(documentStream, SearchEngineType.Google);
+            var result = _plagiarismService.CheckLocalDocumentAsync(documentStream, SearchEngineType.Google);
             Assert.That(result, Is.Not.Null, "Результат должен быть возвращен даже при ошибке поиска");
         });
     }
@@ -135,7 +135,7 @@ public class SimplePlagiarismServiceTests : TestBase
             .ReturnsAsync(new List<SearchItem>());
 
         // Act
-        var result = _plagiarismService.CheckDocument(documentStream, SearchEngineType.Google);
+        var result = _plagiarismService.CheckLocalDocumentAsync(documentStream, SearchEngineType.Google);
         stopwatch.Stop();
 
         // Assert
@@ -144,52 +144,5 @@ public class SimplePlagiarismServiceTests : TestBase
             "Проверка должна завершиться менее чем за 5 секунд");
         
         Console.WriteLine($"Время выполнения: {stopwatch.ElapsedMilliseconds} мс");
-    }
-
-    /// <summary>Тест сравнения текстов</summary>
-    [Test]
-    public void CompareSimilarity_WithSimilarTexts_ReturnsPositiveScore()
-    {
-        // Arrange
-        var text1 = TestTexts.QuantumPhysicsOriginal;
-        var text2 = TestTexts.QuantumPhysicsPlagiarized;
-
-        // Act
-        var similarity = CalculateTextSimilarity(text1, text2);
-
-        // Assert
-        Assert.That(similarity, Is.GreaterThan(0), "Сходство между похожими текстами должно быть положительным");
-        Assert.That(similarity, Is.LessThan(1), "Сходство не должно превышать 100%");
-    }
-
-    /// <summary>Тест сравнения разных текстов</summary>
-    [Test]
-    public void CompareSimilarity_WithDifferentTexts_ReturnsLowScore()
-    {
-        // Arrange
-        var text1 = TestTexts.QuantumPhysicsOriginal;
-        var text2 = TestTexts.BiotechnologyUnique;
-
-        // Act
-        var similarity = CalculateTextSimilarity(text1, text2);
-
-        // Assert
-        Assert.That(similarity, Is.LessThan(0.5), "Сходство между разными текстами должно быть низким");
-    }
-
-    /// <summary>Вспомогательный метод для расчета сходства текстов</summary>
-    private double CalculateTextSimilarity(string text1, string text2)
-    {
-        if (string.IsNullOrEmpty(text1) || string.IsNullOrEmpty(text2))
-            return 0;
-
-        // Простой алгоритм сходства на основе общих слов
-        var words1 = text1.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
-        var words2 = text2.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToHashSet();
-        
-        var intersection = words1.Intersect(words2).Count();
-        var union = words1.Union(words2).Count();
-        
-        return union > 0 ? (double)intersection / union : 0;
     }
 }

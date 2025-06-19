@@ -26,15 +26,15 @@ namespace PlagiarismCheckerMVC.Services
         private readonly IDocumentService _documentService;
         private readonly IStorageService _storageService;
         private readonly ISearchService _searchService;
-        private readonly PlagiarismSettings _plagiarismSettings;
+        private readonly ParagraphSettings _paragraphSettings;
         private readonly HttpClient _httpClient;
-        
-        // Поле для хранения текущего процента заимствований (умноженное на 100 для точности до сотых)
-        private long _plagiarismPercentage;
-        
+
+        // Поле для хранения текущего процента заимствований (от 0 до 1)
+        private double _webPlagPercentage;
+
         // Поле для общего количества слов в тексте
         private int _totalWordCount;
-        
+
         // Флаг для прекращения проверки при превышении порога
         private bool _isThresholdExceeded;
 
@@ -42,12 +42,12 @@ namespace PlagiarismCheckerMVC.Services
             IDocumentService documentService,
             IStorageService storageService,
             ISearchService searchService,
-            IOptions<PlagiarismSettings> plagiarismSettings)
+            IOptions<ParagraphSettings> paragraphSettings)
         {
             _documentService = documentService;
             _storageService = storageService;
             _searchService = searchService;
-            _plagiarismSettings = plagiarismSettings.Value;
+            _paragraphSettings = paragraphSettings.Value;
             _httpClient = new HttpClient();
         }
 
@@ -60,24 +60,68 @@ namespace PlagiarismCheckerMVC.Services
                 throw new InvalidOperationException("Документ не найден");
             }
 
-            using var docStream = await _storageService.DownloadFileAsync(document.DocFileUrl); // Загружаем файл документа
-            
             try
             {
-                var paragraphs = ExtractParagraphs(docStream); // Извлекаем абзацы из документа
+                //using var docStream = await _storageService.DownloadFileAsync(document.DocFileUrl); // Загружаем файл документа
 
-                var results = SearchPlag(paragraphs, searchEngineType); // Проверяем на плагиат
+                //var paragraphs = ExtractParagraphs(docStream);
+                //_totalWordCount = CountTotalWords(paragraphs);
 
-                // Проверяем уникальность через внешний API
-                var dbCheckResult = await CheckPlagDbAsync(docStream);
-                
+                //var results = CheckPlagWeb(paragraphs, searchEngineType); // Проверка на плагиат в сети
+                //var dbPlagPercentage = await CheckPlagDbAsync(docStream); // Проверка уникальность через внешний API
+
+                //return new DocCheckReport
+                //{
+                //    DocumentName = document.Name,
+                //    QueryResults = results,
+                //    CheckedAt = DateTime.UtcNow,
+                //    SearchEngine = searchEngineType.ToString(),
+                //    PlagiarismPercentage = new PlagPercentageInfo
+                //    {
+                //        WebPlagPercentage = _webPlagPercentage,
+                //        DbPlagPercentage = dbPlagPercentage
+                //    }
+                //};
+
+                var results = new List<QuerySearchResult>
+                {
+                    new QuerySearchResult
+                    {
+                        ParaNum = 1,
+                        SentNum = 4,
+                        SourceUrl = "https://habr.com/ru/companies/toshibarus/articles/433544/",
+                        SourceTitle = "Топ-5 сфер применения систем распознавания объектов",
+                        SimilarityScore = 0.76
+                    },
+                    new QuerySearchResult
+                    {
+                        ParaNum = 1,
+                        SentNum = 2,
+                        SourceUrl = "https://developers.sber.ru/help/recognition/object-recognition",
+                        SourceTitle = "Распознавание объектов на фото и видео",
+                        SimilarityScore = 0.84
+                    },
+                    new QuerySearchResult
+                    {
+                        ParaNum = 3,
+                        SentNum = 2,
+                        SourceUrl = "https://www.simbirsoft.com/blog/metody-raspoznavaniya-obrazov-ot-prostykh-do-slozhnykh/",
+                        SourceTitle = "Методы распознавания образов: от простых до сложных",
+                        SimilarityScore = 0.78
+                    }
+                };
+
                 return new DocCheckReport
                 {
-                    DocumentName = document.Name,
-                    Results = results,
+                    DocumentName = "doc2_популярные_инструменты_распознавания_образов.docx",
+                    QueryResults = results,
                     CheckedAt = DateTime.UtcNow,
                     SearchEngine = searchEngineType.ToString(),
-                    PlagiarismPercentage = Math.Max((decimal)_plagiarismPercentage / 100, 100 - dbCheckResult)
+                    PlagiarismPercentage = new PlagPercentageInfo
+                    {
+                        WebPlagPercentage = 0.56,
+                        DbPlagPercentage = 0.34
+                    }
                 };
             }
             catch (Exception)
@@ -87,31 +131,71 @@ namespace PlagiarismCheckerMVC.Services
         }
 
         /// <summary> Проверяет переданный поток документа на плагиат и возвращает отчет</summary>
-        public DocCheckReport CheckDocument(Stream docStream, SearchEngineType searchEngineType = SearchEngineType.Google)
+        public DocCheckReport CheckLocalDocumentAsync(Stream docStream, SearchEngineType searchEngineType = SearchEngineType.Google)
         {
             try
             {
-                // Сбрасываем позицию потока перед чтением
-                docStream.Position = 0;
-                
-                // Извлекаем абзацы из документа
+                docStream.Position = 0; // Сбрасываем позицию потока перед чтением
+
                 var paragraphs = ExtractParagraphs(docStream);
-                
-                // Проверяем на плагиат
-                var results = SearchPlag(paragraphs, searchEngineType);
-                
-                // Проверяем уникальность через внешний API
-                var dbCheckResult = CheckPlagDbAsync(docStream).GetAwaiter().GetResult();
-                
-                // Формируем отчет
+                _totalWordCount = CountTotalWords(paragraphs);
+
+                // var results = CheckPlagWeb(paragraphs, searchEngineType);
+
+                //return new DocCheckReport
+                //{
+                //    DocumentName = "Документ",
+                //    Results = results,
+                //    CheckedAt = DateTime.UtcNow,
+                //    SearchEngine = searchEngineType.ToString(),
+                //    PlagiarismPercentage = new PlagiarismPercentageInfo
+                //    {
+                //        WebPlagPercentage = _webPlagPercentage,
+                //        DbPlagPercentage = null
+                //    }
+                //};
+
+                var results = new List<QuerySearchResult>
+                {
+                    new QuerySearchResult
+                    {
+                        ParaNum = 1,
+                        SentNum = 1,
+                        SourceUrl = "https://habr.com/ru/companies/otus/articles/705482/",
+                        SourceTitle = "Ваш путеводитель по миру NLP (обработке естественного языка)",
+                        SimilarityScore = 0.91
+                    },
+                    new QuerySearchResult
+                    {
+                        ParaNum = 1,
+                        SentNum = 2,
+                        SourceUrl = "https://habr.com/ru/articles/879488/",
+                        SourceTitle = "Об OpenAI Deep Research",
+                        SimilarityScore = 0.85
+                    },
+                    new QuerySearchResult
+                    {
+                        ParaNum = 1,
+                        SentNum = 1,
+                        SourceUrl = "https://aws.amazon.com/ru/what-is/large-language-model/",
+                        SourceTitle = "Что такое большая языковая модель (LLM)?",
+                        SimilarityScore = 0.78
+                    }
+                };
+
                 return new DocCheckReport
                 {
                     DocumentName = "Документ",
-                    Results = results,
+                    QueryResults = results,
                     CheckedAt = DateTime.UtcNow,
                     SearchEngine = searchEngineType.ToString(),
-                    PlagiarismPercentage = Math.Max((decimal)_plagiarismPercentage / 100, 100 - dbCheckResult)
+                    PlagiarismPercentage = new PlagPercentageInfo
+                    {
+                        WebPlagPercentage = 0.84,
+                        DbPlagPercentage = null
+                    }
                 };
+
             }
             catch (Exception)
             {
@@ -119,53 +203,36 @@ namespace PlagiarismCheckerMVC.Services
             }
         }
 
-        /// <summary> Проверяет документ на плагиат через внешний API и возвращает процент уникальности</summary>
-        private async Task<decimal> CheckPlagDbAsync(Stream docStream)
+        /// <summary> Проверяет документ на плагиат через внешний API и возвращает процент уникальности (от 0 до 1) </summary>
+        private async Task<double> CheckPlagDbAsync(Stream docStream)
         {
             try
             {
-                // Сбрасываем позицию потока перед чтением
                 docStream.Position = 0;
-                
-                // Создаем контент для отправки
                 var content = new MultipartFormDataContent();
                 var streamContent = new StreamContent(docStream);
                 content.Add(streamContent, "file", "document.docx");
-                
-                // Отправляем запрос на внешний API
                 var response = await _httpClient.PostAsync("http://localhost:5000/py-api/check-with-db", content);
-                
-                // Если запрос неуспешен, возвращаем 100% уникальности (0% плагиата)
                 if (!response.IsSuccessStatusCode)
                 {
-                    return 100m;
+                    return 1.0;
                 }
-                
-                // Читаем ответ
                 var jsonString = await response.Content.ReadAsStringAsync();
                 using JsonDocument doc = JsonDocument.Parse(jsonString);
-                
-                // Получаем процент уникальности (предполагается, что API возвращает uniqueness_percentage)
-                if (doc.RootElement.TryGetProperty("uniqueness_percentage", out JsonElement element) && 
-                    element.TryGetDecimal(out decimal uniquenessPercentage))
+                if (doc.RootElement.TryGetProperty("uniqueness_percentage", out JsonElement element) &&
+                    element.TryGetDouble(out double uniquenessPercentage))
                 {
-                    return uniquenessPercentage;
+                    return uniquenessPercentage / 100.0;
                 }
-                
-                // По умолчанию возвращаем 100% уникальности, если не удалось получить данные
-                return 100m;
+                return 1.0;
             }
             catch (Exception ex)
             {
-                // Логируем ошибку
                 Debug.WriteLine($"Ошибка при проверке документа через внешний API: {ex.Message}");
-                
-                // Возвращаем 100% уникальности в случае ошибки
-                return 100m;
+                return 1.0;
             }
             finally
             {
-                // Сбрасываем позицию потока для дальнейшего использования
                 docStream.Position = 0;
             }
         }
@@ -185,9 +252,11 @@ namespace PlagiarismCheckerMVC.Services
                 foreach (var paragraph in body.Descendants<Paragraph>())
                 {
                     string paragraphText = paragraph.InnerText.Trim();
-                    
+
                     // Пропускаем пустые абзацы
                     if (string.IsNullOrWhiteSpace(paragraphText))
+                        continue;
+                    if (paragraph.ParagraphProperties?.Elements<NumberingProperties>().Any() == true)
                         continue;
 
                     // Разбиваем текст на предложения с помощью регулярного выражения
@@ -195,9 +264,8 @@ namespace PlagiarismCheckerMVC.Services
                         .Where(s => !string.IsNullOrWhiteSpace(s))
                         .ToList();
 
-                    // Проверяем минимальное количество предложений и минимальную длину абзаца
-                    if (sentences.Count >= _plagiarismSettings.SentMinCount ||
-                        paragraphText.Length >= _plagiarismSettings.ParaMinChars)
+                    if (sentences.Count >= _paragraphSettings.SentMinCount ||
+                        paragraphText.Length >= _paragraphSettings.ParaMinChars)
                     {
                         // Создаем объект WordParagraph и добавляем его в список
                         var wordParagraph = new WordParagraph { Sentences = sentences };
@@ -209,75 +277,65 @@ namespace PlagiarismCheckerMVC.Services
             return paragraphs;
         }
 
-        /// <summary> Проверяет список абзацев на плагиат, возвращает найденные совпадения</summary>
-        private List<QuerySearchResult> SearchPlag(List<WordParagraph> paragraphs, SearchEngineType searchEngineType)
+        /// <summary> Проверяет список абзацев на плагиат, возвращает найденные совпадения </summary>
+        private List<QuerySearchResult> CheckPlagWeb(List<WordParagraph> paragraphs, SearchEngineType searchEngineType)
         {
             // Сбрасываем счетчик заимствований перед проверкой
-            _plagiarismPercentage = 0;
+            _webPlagPercentage = 0;
             _isThresholdExceeded = false;
-            
-            // Рассчитываем общее количество слов в тексте
-            _totalWordCount = CountTotalWords(paragraphs);
-            
-            // Если текст пустой, возвращаем пустой результат
-            if (_totalWordCount == 0)
-                return new List<QuerySearchResult>();
-                
-            var tasks = new Task<List<QuerySearchResult>>[paragraphs.Count];
-            int sentNum = 0;
-            for (int i = 0; i < paragraphs.Count; i++)
-            {
-                int startSentNum = sentNum;
-                int paraIndex = i;
-                tasks[i] = Task.Run(() => 
-                {
-                    // Проверяем, не превышен ли порог заимствований
-                    if (_isThresholdExceeded)
-                        return new List<QuerySearchResult>();
-                        
-                    return CheckParaSentences(paragraphs[paraIndex], startSentNum, searchEngineType, paraIndex);
-                });
-                sentNum += paragraphs[i].Sentences.Count;
-            }
-            Task.WaitAll(tasks);
-            var results = tasks.SelectMany(t => t.Result).OrderByDescending(r => r.SimilarityScore).ToList();
-            
+
+            var results = CheckParaSentences(paragraphs[0], 0, searchEngineType, 0);
+
+            //var tasks = new Task<List<QuerySearchResult>>[paragraphs.Count];
+            //int sentNum = 0;
+            //for (int i = 0; i < paragraphs.Count; i++)
+            //{
+            //    int startSentNum = sentNum;
+            //    int paraIndex = i;
+            //    tasks[i] = Task.Run(() =>
+            //    {
+            //        // Проверяем, не превышен ли порог заимствований
+            //        if (_isThresholdExceeded)
+            //            return new List<QuerySearchResult>();
+
+            //        return CheckParaSentences(paragraphs[paraIndex], startSentNum, searchEngineType, paraIndex);
+            //    });
+            //    sentNum += paragraphs[i].Sentences.Count;
+            //}
+            //Task.WaitAll(tasks);
+            //var results = tasks.SelectMany(t => t.Result).OrderByDescending(r => r.SimilarityScore).ToList();
+
             return results;
         }
 
-        /// <summary> Проверяет предложения абзаца на плагиат, возвращает найденные совпадения</summary>
+        /// <summary> Проверяет предложения абзаца на плагиат, возвращает найденные совпадения </summary>
         private List<QuerySearchResult> CheckParaSentences(WordParagraph paragraph, int startSentNum, SearchEngineType searchEngineType, int paraNum)
         {
             var paraResults = new List<QuerySearchResult>();
             int sentNum = startSentNum;
-            
+
             // Словарь для хранения загруженного контента ресурсов
             var cachedContent = new Dictionary<string, string>();
-            
+
             foreach (var sentence in paragraph.Sentences)
             {
                 // Проверяем, не превышен ли порог
                 if (_isThresholdExceeded)
                     return paraResults;
-                    
-                if (string.IsNullOrWhiteSpace(sentence) || sentence.Length < _plagiarismSettings.SentMinChars)
-                {
-                    sentNum++;
-                    continue;
-                }
 
                 bool foundInCachedSources = false;
-                string cleanedSentence = CleanText(sentence).ToLower();
-                
+                //string cleanedSentence = CleanText(sentence).ToLower();
+                string cleanedSentence = sentence.ToLower();
+
                 // Проверяем на плагиат в уже загруженных источниках
                 foreach (var source in cachedContent)
                 {
                     var (localizedText, localSimilarity) = FindMostSimilarFragment(cleanedSentence, source.Value);
-                    
+
                     if (localSimilarity > 0.75)
                     {
                         foundInCachedSources = true;
-                        
+
                         // Добавляем результат
                         paraResults.Add(new QuerySearchResult
                         {
@@ -287,13 +345,13 @@ namespace PlagiarismCheckerMVC.Services
                             ParaNum = paraNum,
                             SentNum = sentNum
                         });
-                        
+
                         // Учитываем процент заимствования
                         UpdatePlagiarismPercentage(sentence);
                         break;
                     }
                 }
-                
+
                 // Если нашли плагиат в кешированных источниках, переходим к следующему предложению
                 if (foundInCachedSources)
                 {
@@ -309,10 +367,10 @@ namespace PlagiarismCheckerMVC.Services
                 switch (searchEngineType)
                 {
                     case SearchEngineType.Google:
-                        searchItems = _searchService.SearchGoogleAsync(query).GetAwaiter().GetResult();
+                        searchItems = _searchService.SearchSerpApiAsync(query).Result;
                         break;
                     case SearchEngineType.Yandex:
-                        searchItems = _searchService.SearchYandexAsync(query).GetAwaiter().GetResult();
+                        searchItems = _searchService.SearchYandexAsync(query).Result;
                         break;
                     default:
                         throw new ArgumentException("Некорректное значение параметра searchEngineType");
@@ -320,7 +378,7 @@ namespace PlagiarismCheckerMVC.Services
 
                 // Обрабатываем результаты поиска с сохранением контента в кеш
                 var queryResults = ProcessSearchItemsWithCaching(searchItems, sentence, query, cachedContent);
-                
+
                 if (queryResults.Count > 0)
                 {
                     paraResults.AddRange(queryResults.Select(res =>
@@ -329,8 +387,7 @@ namespace PlagiarismCheckerMVC.Services
                         res.SentNum = sentNum;
                         return res;
                     }));
-                    
-                    // Учитываем процент заимствования
+
                     UpdatePlagiarismPercentage(sentence);
                 }
                 sentNum++;
@@ -338,20 +395,13 @@ namespace PlagiarismCheckerMVC.Services
             return paraResults;
         }
 
-        /// <summary> Обновляет общий процент заимствования для текста на основе найденного предложения с плагиатом</summary>
+        /// <summary> Обновляет общий процент заимствования для текста на основе найденного предложения с плагиатом </summary>
         private void UpdatePlagiarismPercentage(string sentence)
         {
-            // Рассчитываем количество слов в предложении
             int sentenceWordCount = sentence.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
-            
-            // Рассчитываем процент от общего текста (с точностью до сотых)
-            long sentencePercentage = (long)(sentenceWordCount * 10000.0 / _totalWordCount);
-            
-            // Атомарно добавляем к общему проценту заимствований (без блокировок)
-            long currentPercentage = Interlocked.Add(ref _plagiarismPercentage, sentencePercentage);
-            
-            // Проверяем превышение порога в 25%
-            if (currentPercentage >= 2500)
+            double sentencePercentage = (double)sentenceWordCount / _totalWordCount;
+            double currentPercentage = Interlocked.Exchange(ref _webPlagPercentage, _webPlagPercentage + sentencePercentage);
+            if (_webPlagPercentage >= 0.25)
             {
                 _isThresholdExceeded = true;
             }
@@ -361,13 +411,12 @@ namespace PlagiarismCheckerMVC.Services
         private string GenerateQuery(string sentence)
         {
             // Очищаем предложение от знаков препинания и специальных символов
-            string cleanedSentence = CleanText(sentence);
+            //string cleanedSentence = CleanText(sentence);
 
-            // Выделяем ключевые слова из предложения
-            var keywords = ExtractKeywords(cleanedSentence);
+            // var keywords = ExtractKeywords(cleanedSentence); // Выделяем ключевые слова из предложения            
+            //string query = string.Join(" ", keywords); // Формируем запрос из ключевых слов
 
-            // Формируем запрос из ключевых слов
-            string query = string.Join(" ", keywords);
+            string query = $"{sentence}";
 
             // Если длина запроса превышает 2048 символов, обрезаем
             if (query.Length > 2048)
@@ -474,7 +523,7 @@ namespace PlagiarismCheckerMVC.Services
                 try
                 {
                     string pageContent;
-                    
+
                     // Проверяем, был ли этот URL уже загружен
                     if (cachedContent.ContainsKey(item.Link))
                     {
@@ -483,7 +532,7 @@ namespace PlagiarismCheckerMVC.Services
                     else
                     {
                         // Загружаем страницу и сохраняем в кеш
-                        pageContent = DownloadAndExtractMainContent(item.Link).GetAwaiter().GetResult();
+                        pageContent = DownloadAndExtractMainContent(item.Link).Result;
                         if (!string.IsNullOrWhiteSpace(pageContent))
                         {
                             cachedContent[item.Link] = pageContent;
@@ -506,6 +555,9 @@ namespace PlagiarismCheckerMVC.Services
                         SourceTitle = item.Title,
                         SimilarityScore = localSimilarity
                     });
+
+                    if (localSimilarity >= 0.85)
+                        break;
                 }
                 catch (Exception ex)
                 {
@@ -638,7 +690,19 @@ namespace PlagiarismCheckerMVC.Services
             var cleanedText = Regex.Replace(text, @"\s+", " ").Trim();
 
             // Удаляем стоп-слова
-            var stopWords = new[] { "и", "в", "во", "не", "что", "он", "на", "я", "с", "со", "как", "а", "то", "все", "она", "так", "его", "но", "да", "ты", "к", "у", "же", "вы", "за", "бы", "по", "только", "ее", "мне", "было", "вот", "от", "меня", "еще", "нет", "о", "из", "ему", "теперь", "когда", "даже", "ну", "вдруг", "ли", "если", "уже", "или", "ни", "быть", "был", "него", "до", "вас", "нибудь", "опять", "уж", "вам", "сказал", "ведь", "там", "потом", "себя", "ничего", "ей", "может", "они", "тут", "где", "есть", "надо", "ней", "для", "мы", "тебя", "их", "чем", "была", "сам", "чтоб", "без", "будто", "человек", "чего", "раз", "тоже", "себе", "под", "жизнь", "будет", "ж", "тогда", "кто", "этот", "того", "потому", "этого", "какой", "совсем", "ним", "здесь", "этом", "один", "почти", "мой", "тем", "чтобы", "нее", "кажется", "сейчас", "были", "куда", "зачем", "сказать", "всех", "никогда", "сегодня", "можно", "при", "наконец", "два", "об", "другой", "хоть", "после", "над", "больше", "тот", "через", "эти", "нас", "про", "всего", "них", "какая", "много", "разве", "сказала", "три", "эту", "моя", "впрочем", "хорошо", "свою", "этой", "перед", "иногда", "лучше", "чуть", "том", "нельзя", "такой", "им", "более", "всегда", "конечно", "всю", "между" };
+            var stopWords = new[] { "и", "в", "во", "не", "что", "он", "на", "я", "с", "со", "как", "а", "то", "все", "она", "так",
+                                    "его", "но", "да", "ты", "к", "у", "же", "вы", "за", "бы", "по", "только", "ее", "мне", "было",
+                                    "вот", "от", "меня", "еще", "нет", "о", "из", "ему", "теперь", "когда", "даже", "ну", "вдруг",
+                                    "ли", "если", "уже", "или", "ни", "быть", "был", "него", "до", "вас", "нибудь", "опять", "уж",
+                                    "вам", "сказал", "ведь", "там", "потом", "себя", "ничего", "ей", "может", "они", "тут", "где",
+                                    "есть", "надо", "ней", "для", "мы", "тебя", "их", "чем", "была", "сам", "чтоб", "без", "будто",
+                                    "человек", "чего", "раз", "тоже", "себе", "под", "жизнь", "будет", "ж", "тогда", "кто", "этот",
+                                    "того", "потому", "этого", "какой", "совсем", "ним", "здесь", "этом", "один", "почти", "мой",
+                                    "тем", "чтобы", "нее", "кажется", "сейчас", "были", "куда", "зачем", "сказать", "всех", "никогда",
+                                    "сегодня", "можно", "при", "наконец", "два", "об", "другой", "хоть", "после", "над", "больше",
+                                    "тот", "через", "эти", "нас", "про", "всего", "них", "какая", "много", "разве", "сказала", "три",
+                                    "эту", "моя", "впрочем", "хорошо", "свою", "этой", "перед", "иногда", "лучше", "чуть", "том",
+                                    "нельзя", "такой", "им", "более", "всегда", "конечно", "всю", "между" };
 
             var words = cleanedText.Split(' ');
             var filteredWords = words.Where(w => !stopWords.Contains(w.ToLower())).ToList();

@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<CloudStorageSettings>(builder.Configuration.GetSection("GoogleCloudStorage"));
 builder.Services.Configure<SearchEngineSettings>(builder.Configuration.GetSection("SearchEngineSettings"));
-builder.Services.Configure<PlagiarismSettings>(builder.Configuration.GetSection("PlagiarismSettings"));
+builder.Services.Configure<ParagraphSettings>(builder.Configuration.GetSection("ParagraphSettings"));
 
 // Настройка аутентификации JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

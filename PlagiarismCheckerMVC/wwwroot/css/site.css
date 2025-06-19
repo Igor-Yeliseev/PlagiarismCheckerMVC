@@ -849,6 +849,85 @@ input[type="radio"]:checked + label {
     box-shadow: none !important;
 }
 
+.plag-results-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 10px;
+}
+.plag-results-table th, .plag-results-table td {
+    border: 1px solid #aaa;
+    padding: 6px 10px;
+    text-align: center;
+}
+.plag-results-table th {
+    background: #4d5fa959;
+}
+.plag-link {
+    color: #7CFC00;
+    text-decoration: underline;
+}
+
+/* --- кастомные стили для check-uploaded --- */
+.percent-labels {
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+    margin: 10px 0 20px 0;
+    font-size: 1.1em;
+    align-items: center;
+}
+.source-link {
+    color: #b39ddb !important;
+    word-break: break-all;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+.source-link:hover {
+    color: #d1c4e9 !important;
+}
+.results-meta {
+    color: #fff !important;
+}
+
+/* Для таблицы plag-results-table */
+.plag-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: rgba(77, 95, 169, 0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    color: #fff;
+}
+.plag-results-table th, .plag-results-table td {
+    border: 2px solid #9a92d1d3;
+    padding: 10px;
+    text-align: center;
+}
+.plag-results-table th {
+    background-color: rgba(105, 98, 180, 0.5);
+    font-weight: 600;
+    font-size: 115%;
+}
+
+/* Цвета для процента оригинальности */
+.originality-red {
+    color: #ff5252;
+    font-weight: bold;
+}
+.originality-orange {
+    color: #ff9800;
+    font-weight: bold;
+}
+.originality-yellow {
+    color: #ffd600;
+    font-weight: bold;
+}
+.originality-green {
+    color: #69f06e;
+    font-weight: bold;
+}
+
 
 
 

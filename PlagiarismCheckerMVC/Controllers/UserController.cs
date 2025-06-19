@@ -38,7 +38,7 @@ namespace PlagiarismCheckerMVC.Controllers
                 UserId = user.Id,
                 Email = user.Email,
                 Username = user.Username,
-                Role = user.Role == UserRole.Admin ? "Администратор" : "Пользователь",
+                Role = (user.Role == UserRole.Admin) ? "Администратор" : "Пользователь",
                 PhoneNumber = user.PhoneNumber,
                 CreatedAt = user.CreatedAt
             };

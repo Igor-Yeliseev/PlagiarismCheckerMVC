@@ -14,5 +14,6 @@ namespace PlagiarismCheckerMVC.Services
         Task<Document> GetByIdAsync(Guid id);
         Task DeleteAsync(Guid id, Guid userId);
         Task<int> GetUserDocumentCountAsync(Guid userId);
+        Task<bool> IsFileAlreadyExistsAsync(string fileName, long fileSize, Guid userId);
     }
 }

@@ -90,6 +90,24 @@ function displayProfile(profile) {
         const savePasswordBtn = editPasswordForm.querySelector('button[type="submit"]');
         savePasswordBtn.disabled = true;
         savePasswordBtn.classList.add('disabled-btn');
+
+        // Кнопка-глаз для показа пароля
+        setTimeout(() => {
+            const newPasswordInput = document.getElementById('new-password');
+            const toggleBtn = document.getElementById('toggle-password-visibility');
+            if (newPasswordInput && toggleBtn) {
+                // Удаляем старые обработчики (заменяем кнопку на клон)
+                const newToggleBtn = toggleBtn.cloneNode(true);
+                toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+                const show = () => { newPasswordInput.type = 'text'; };
+                const hide = () => { newPasswordInput.type = 'password'; };
+                newToggleBtn.addEventListener('mousedown', show);
+                newToggleBtn.addEventListener('touchstart', show);
+                newToggleBtn.addEventListener('mouseup', hide);
+                newToggleBtn.addEventListener('mouseleave', hide);
+                newToggleBtn.addEventListener('touchend', hide);
+            }
+        }, 150);
     };
     cancelPasswordBtn.onclick = () => {
         modalPassword.style.display = 'none';
@@ -101,7 +119,6 @@ function displayProfile(profile) {
     editPasswordForm.addEventListener('input', () => {
         const currentPassword = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
-        const savePasswordBtn = editPasswordForm.querySelector('button[type="submit"]');
         savePasswordBtn.disabled = !(currentPassword && newPassword);
         if (savePasswordBtn.disabled) {
             savePasswordBtn.classList.add('disabled-btn');

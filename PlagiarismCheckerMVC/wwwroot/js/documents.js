@@ -216,7 +216,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error('Ошибка при загрузке файла');
+                let errorMsg = 'Ошибка при загрузке файла';
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.message) {
+                        errorMsg = errorData.message;
+                    }
+                } catch {}
+                throw new Error(errorMsg);
             }
 
             // После успешной загрузки перезагружаем список документов

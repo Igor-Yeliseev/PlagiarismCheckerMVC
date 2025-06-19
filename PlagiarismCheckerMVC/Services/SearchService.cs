@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text.Json;
 using System.Web;
 using Microsoft.Extensions.Options;
 using PlagiarismCheckerMVC.Models;
-using System.Linq;
+using AngleSharp.Html.Parser;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace PlagiarismCheckerMVC.Services
 {
@@ -101,6 +103,32 @@ namespace PlagiarismCheckerMVC.Services
                 Console.WriteLine($"Ошибка при поиске в Яндексе: {ex.Message}");
                 return new List<SearchItem>();
             }
+        }
+
+        public async Task<List<SearchItem>> SearchSerpApiAsync(string query)
+        {
+            var apiKey = "9582a6313569583ac20c010a6a3f8d25f3f1c7d9";
+            var url = "https://google.serper.dev/search";
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Add("X-API-KEY", apiKey);
+            var requestContent = new StringContent("{\"q\": \"" + query + "\"}", null, "application/json");
+            request.Content = requestContent;
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(content);
+            var results = new List<SearchItem>();
+            if (doc.RootElement.TryGetProperty("organic", out var organicResults))
+            {
+                foreach (var item in organicResults.EnumerateArray().Take(6))
+                {
+                    var title = item.GetProperty("title").GetString() ?? string.Empty;
+                    var link = item.GetProperty("link").GetString() ?? string.Empty;
+                    var snippet = item.TryGetProperty("snippet", out var snip) ? snip.GetString() ?? string.Empty : string.Empty;
+                    results.Add(new SearchItem { Title = title, Link = link, Snippet = snippet });
+                }
+            }
+            return results;
         }
     }
 

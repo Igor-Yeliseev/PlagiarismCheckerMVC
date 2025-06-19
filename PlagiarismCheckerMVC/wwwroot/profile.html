@@ -96,7 +96,23 @@
                     <h3>Изменить пароль</h3>
                     <form id="edit-password-form-modal" class="edit-form-modal">
                         <input type="password" id="current-password" class="form-control" placeholder="Текущий пароль" required>
-                        <input type="password" id="new-password" class="form-control" placeholder="Новый пароль" minlength="6" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z0-9]).{6,}$">
+                        <div style="position:relative;display:flex;align-items:center;">
+                            <input type="password" id="new-password" class="form-control" placeholder="Новый пароль" minlength="6" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d[^A-Za-z0-9]]{8,}$">
+                            <button type="button" id="toggle-password-visibility" tabindex="-1" aria-label="Показать пароль" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;margin:0;color:#888;font-size:1.2em;">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                        <label class="password-req-label" style="color:#bdbdbd;font-size:0.97em;margin-top:-8px;margin-bottom:10px;display:block;text-align:justify;">
+                            Пароль должен содержать:
+                            <ul style="margin:4px 0 0 18px;padding:0;">
+                                <li>Минимум 8 символов</li>
+                                <li>Только латинские буквы</li>
+                                <li>Хотя бы одну цифру</li>
+                                <li>Хотя бы одну заглавную букву</li>
+                                <li>Хотя бы одну строчную букву</li>
+                                <li>Хотя бы один спецсимвол</li>
+                            </ul>
+                        </label>
                         <div class="modal-actions">
                             <button type="submit" class="btn">Сохранить</button>
                             <button type="button" id="cancel-password-btn-modal" class="btn">Отмена</button>

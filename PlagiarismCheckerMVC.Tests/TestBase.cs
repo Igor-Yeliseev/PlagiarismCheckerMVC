@@ -59,15 +59,15 @@ public abstract class TestBase
     {
         var configSection = new Mock<IConfigurationSection>();
         configSection.Setup(x => x.Value).Returns("5");
-        MockConfiguration.Setup(x => x.GetSection("PlagiarismSettings:SentMinCount")).Returns(configSection.Object);
+        MockConfiguration.Setup(x => x.GetSection("ParagraphSettings:SentMinCount")).Returns(configSection.Object);
 
         configSection = new Mock<IConfigurationSection>();
         configSection.Setup(x => x.Value).Returns("100");
-        MockConfiguration.Setup(x => x.GetSection("PlagiarismSettings:ParaMinChars")).Returns(configSection.Object);
+        MockConfiguration.Setup(x => x.GetSection("ParagraphSettings:ParaMinChars")).Returns(configSection.Object);
 
         configSection = new Mock<IConfigurationSection>();
         configSection.Setup(x => x.Value).Returns("25");
-        MockConfiguration.Setup(x => x.GetSection("PlagiarismSettings:PlagiarismThreshold")).Returns(configSection.Object);
+        MockConfiguration.Setup(x => x.GetSection("ParagraphSettings:PlagiarismThreshold")).Returns(configSection.Object);
     }
 
     /// <summary>Настройка сервисов для тестирования</summary>

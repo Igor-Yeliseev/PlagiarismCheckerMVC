@@ -85,8 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             stopTimer();
             
             if (response.ok) {
-                alert('Отображение результатов проверки');
-                // displayResults(data);
+                renderResultsTable(data);
             }
             else {
                 showError(data.message || 'Ошибка при проверке на плагиат');
@@ -113,66 +112,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Функция отображения результатов
-    function displayResults(data) {
-        if (!data.results || data.results.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="results-header">
-                    <h2 class="results-title">Результаты проверки для "${data.documentName}"</h2>
-                    <div class="results-meta">
-                        <span>Поисковая система: ${data.searchEngine}</span>
-                        <span>Дата проверки: ${new Date(data.checkedAt).toLocaleString()}</span>
-                    </div>
-                </div>
-                <div class="no-results">
-                    <p>Заимствований не найдено.</p>
-                </div>
-            `;
+    function renderResultsTable(report) {
+        // Очищаем контейнер перед выводом
+        resultsContainer.innerHTML = '';
+        let html = '';
+        html += `<div class="results-header">
+            <h2 class="results-title">Результаты проверки для "${report.documentName}"</h2>
+            <div class="results-meta">
+                <span>Поисковая система: ${report.searchEngine}</span>
+                <span>Дата проверки: ${new Date(report.checkedAt).toLocaleString()}</span>
+            </div>
+        </div>`;
+        // Вывод процентов
+        if (report.plagiarismPercentage) {
+            if (report.plagiarismPercentage.webPlagPercentage !== undefined && report.plagiarismPercentage.webPlagPercentage !== null) {
+                const webPercent = (report.plagiarismPercentage.webPlagPercentage * 100).toFixed(1);
+                const webClass = getOriginalityClass(Number(webPercent));
+                html += `<div class=\"percent-labels\">
+                    <span><b>Процент плагиата из сети:</b> <span class=\"${webClass}\">${webPercent}%</span></span>
+                </div>`;
+            }
+            if (report.plagiarismPercentage.dbPlagPercentage !== undefined && report.plagiarismPercentage.dbPlagPercentage !== null) {
+                const dbPercent = (report.plagiarismPercentage.dbPlagPercentage * 100).toFixed(1);
+                const dbClass = getOriginalityClass(Number(dbPercent));
+                html += `<div class=\"percent-labels\">
+                    <span><b>Процент плагиата с документами БД:</b> <span class=\"${dbClass}\">${dbPercent}%</span></span>
+                </div>`;
+            }
+        }
+        if (!report.queryResults || !Array.isArray(report.queryResults) || report.queryResults.length === 0) {
+            html += '<div class="no-results"><p>Заимствований не найдено.</p></div>';
+            resultsContainer.innerHTML = html;
             return;
         }
-        
-        // Формируем HTML для результатов
-        let resultsHtml = `
-            <div class="results-header">
-                <h2 class="results-title">Результаты проверки для "${data.documentName}"</h2>
-                <div class="results-meta">
-                    <span>Поисковая система: ${data.searchEngine}</span>
-                    <span>Дата проверки: ${new Date(data.checkedAt).toLocaleString()}</span>
-                </div>
-            </div>
-            <div class="results-summary">
-                <p>Найдено источников с заимствованиями: ${data.results.length}</p>
-            </div>
-            <div class="results-list">
-        `;
-        
-        data.results.forEach(result => {
-            const similarityPercentage = (result.similarityScore * 100).toFixed(1);
-            const similarityClass = getSimilarityClass(result.similarityScore);
-            
-            resultsHtml += `
-                <div class="result-item">
-                    <h3 class="result-title">${escapeHtml(result.sourceTitle)}</h3>
-                    <a href="${result.sourceUrl}" target="_blank" class="result-url">${result.sourceUrl}</a>
-                    <div class="result-content">
-                        <p class="result-text">${escapeHtml(result.originalText)}</p>
-                        <div class="similarity-score ${similarityClass}">
-                            <span>${similarityPercentage}%</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        resultsHtml += '</div>';
-        resultsContainer.innerHTML = resultsHtml;
+        html += `<table class="plag-results-table"><thead><tr><th>Абзац</th><th>Предложение</th><th>Источник</th><th>Заголовок</th></tr></thead><tbody>`;
+        for (const r of report.queryResults) {
+            html += `<tr>`;
+            html += `<td>${r.paraNum ?? ''}</td>`;
+            html += `<td>${r.sentNum ?? ''}</td>`;
+            html += `<td><a href="${r.sourceUrl}" target="_blank" class="source-link">${r.sourceUrl}</a></td>`;
+            html += `<td>${r.sourceTitle ?? ''}</td>`;
+            html += `</tr>`;
+        }
+        html += `</tbody></table>`;
+        resultsContainer.innerHTML = html;
     }
     
-    // Функция для определения класса схожести на основе значения
-    function getSimilarityClass(score) {
-        if (score >= 0.7) return 'high-similarity';
-        if (score >= 0.5) return 'medium-similarity';
-        return 'low-similarity';
-    }
     
     // Функция для экранирования HTML
     function escapeHtml(text) {
@@ -182,5 +167,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    function getOriginalityClass(percent) {
+        if (percent <= 25) return 'originality-green';
+        if (percent <= 55) return 'originality-yellow';
+        if (percent <= 75) return 'originality-orange';
+        return 'originality-red';
     }
 });

@@ -8,5 +8,6 @@ namespace PlagiarismCheckerMVC.Services
     {
         Task<List<SearchItem>> SearchGoogleAsync(string query);
         Task<List<SearchItem>> SearchYandexAsync(string query);
+        Task<List<SearchItem>> SearchSerpApiAsync(string query);
     }
 } 
