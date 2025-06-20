@@ -3,16 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlagiarismCheckerMVC.Models;
 using PlagiarismCheckerMVC.Services;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Text;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace PlagiarismCheckerMVC.Controllers
 {
@@ -107,24 +97,6 @@ namespace PlagiarismCheckerMVC.Controllers
             {
                 return StatusCode(500, new { message = "Произошла ошибка при проверке на плагиат", details = ex.Message });
             }
-        }
-
-        [Obsolete]
-        private decimal CalculateOriginalityPercentage(List<QuerySearchResult> results)
-        {
-            if (results == null || !results.Any())
-                return 100m;
-
-            int totalPlagiarismCount = results.Count;
-            int highPlagiarismCount = results.Count(r => r.SimilarityScore > 0.7);
-            int mediumPlagiarismCount = results.Count(r => r.SimilarityScore > 0.4 && r.SimilarityScore <= 0.7);
-
-            decimal originalityScore = 100m -
-                                      (highPlagiarismCount * 5m) -
-                                      (mediumPlagiarismCount * 2m) -
-                                      (totalPlagiarismCount * 0.5m);
-
-            return Math.Max(0m, Math.Min(100m, originalityScore));
         }
 
         private Guid GetUserId()

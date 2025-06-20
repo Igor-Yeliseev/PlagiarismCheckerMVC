@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (!documentToDelete) return;
 
-            const response = await fetch(`/plag-api/documents/${documentToDelete}`, {
+            const response = await fetch(`/plag-api/delete/${documentToDelete}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
